@@ -16,7 +16,7 @@ class TokenRepository implements TokenInterface
     protected string $keyRefreshToken = 'refresh_token';
     protected string $keyExpiresAt = 'expires_at';
     protected string $keyScope = 'scope';
-    protected string $keyExternalId = 'account_id';
+    protected string $keyExternalId = 'external_id';
 
     public function __construct(ApiToken $table)
     {
@@ -90,5 +90,20 @@ class TokenRepository implements TokenInterface
     public function exists(string $tokenType): bool
     {
         return $this->getToken() !== null;
+    }
+
+    public function getAccessToken(): string
+    {
+        return $this->getToken()->getAttribute($this->keyAccessToken);
+    }
+
+    public function getRefreshToken(): string
+    {
+        return $this->getToken()->getAttribute($this->keyRefreshToken);
+    }
+
+    public function getAccountId(): int
+    {
+        return (int)$this->getToken()->getAttribute($this->keyExternalId);
     }
 }

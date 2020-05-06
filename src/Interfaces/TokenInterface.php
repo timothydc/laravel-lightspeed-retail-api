@@ -18,4 +18,8 @@ interface TokenInterface
     public function createToken(): Model;
 
     public function getToken(): Model;
+
+    public function getAccessToken(): string;
+
+    public function getRefreshToken(): string;
 }

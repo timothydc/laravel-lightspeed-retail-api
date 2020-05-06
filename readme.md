@@ -27,6 +27,16 @@ _Bummer, I know._
 The API client is developer friendly, you can set `http://localhost:8080` as your redirect URI.
 Remember the value of your redirect URI, we will need it later on.
 
+
+### Configure .env
+
+After your API client is approved you will receive a `key` and `secret`. Add those values to your `.env` file.
+
+```bash
+LIGHTSPEED_RETAIL_API_KEY=xxx
+LIGHTSPEED_RETAIL_API_SECRET=xxx
+```
+
 ### Publish resources
 
 You can publish all resources, or you may choose to publish them separately:
@@ -84,12 +94,19 @@ If you would like to alter the redirect you may extend this controller.
 
 ### Make API calls
 
-You can now access the API.
+You can now access the API. All resources return a [Laravel collection][laravel-docs-collections]... which means lots of fun!
 
 ```php
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
+// get all
 $account = LightspeedRetailApi::api()->account()->get();
+
+// get category with ID 20
+$categories = LightspeedRetailApi::api()->category()->get(20);
+
+// same as above, but better
+$categories = LightspeedRetailApi::api()->category()->first(20);
 ```
 
 ## Change log
@@ -123,6 +140,7 @@ MIT. Please see the [license file](license.md) for more information.
 [ls-docs-scopes]: https://developers.lightspeedhq.com/retail/authentication/scopes
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
+[laravel-docs-collections]: https://laravel.com/docs/7.x/collections
 [ico-version]: https://img.shields.io/packagist/v/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/timothydc/laravel-lightspeed-retail-api/master.svg?style=flat-square
