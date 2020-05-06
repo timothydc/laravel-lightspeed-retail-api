@@ -11,10 +11,6 @@ interface TokenInterface
 
     public function saveToken(array $data): Model;
 
-    public function saveAccessToken(string $accessToken): Model;
-
-    public function saveRefreshToken(string $refreshToken): Model;
-
     public function createToken(): Model;
 
     public function getToken(): Model;

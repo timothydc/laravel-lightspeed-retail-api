@@ -50,19 +50,6 @@ class TokenRepository implements TokenInterface
         return $this->getToken();
     }
 
-    public function saveAccessToken(string $accessToken): ApiToken
-    {
-        return $this->saveToken(['access_token' => $accessToken]);
-    }
-
-    public function saveRefreshToken(string $refreshToken): ApiToken
-    {
-        $this->getToken()->setAttribute($this->keyRefreshToken, $refreshToken);
-        $this->getToken()->save();
-
-        return $this->getToken();
-    }
-
     public function getToken(): ApiToken
     {
         if ($this->table->getAttribute($this->keyIdentifier) === null) {
