@@ -13,7 +13,7 @@ class VerifyApiConnectionCommand extends Command
 
     public function handle(): int
     {
-        $this->info(json_encode(LightspeedRetailApi::api()->category()->first()));
+        $this->info(json_encode(LightspeedRetailApi::api()->category()->first(8)));
 
         return 0;
     }

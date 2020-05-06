@@ -15,15 +15,15 @@ trait ResourceMethods
         $this->client = $client;
     }
 
-    public function first(int $id = null): Collection
+    public function first(int $id): Collection
     {
-        return $this->get($id, true);
+        return collect($this->get($id)->first());
     }
 
-    public function get(int $id = null, bool $first = false): Collection
+    public function get(int $id = null): Collection
     {
-        if ($first || $id) {
-            return collect($this->client->get($this->resource, $id)->first());
+        if ($id) {
+            return $this->client->get($this->resource, $id);
         }
 
         return $this->client->get($this->resource, $id);
