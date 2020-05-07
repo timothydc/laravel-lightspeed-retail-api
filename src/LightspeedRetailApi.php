@@ -19,7 +19,7 @@ class LightspeedRetailApi
         return $this->apiClient;
     }
 
-    public static function redirectToAuthorizationPortal(string $scope, string $state = null): \Illuminate\Http\RedirectResponse
+    public function redirectToAuthorizationPortal(string $scope, string $state = null): string
     {
         $query = http_build_query([
             'response_type' => 'code',
@@ -28,6 +28,6 @@ class LightspeedRetailApi
             'state' => $state
         ]);
 
-        return redirect('https://cloud.merchantos.com/oauth/authorize.php' . '?' . $query);
+        return 'https://cloud.merchantos.com/oauth/authorize.php' . '?' . $query;
     }
 }

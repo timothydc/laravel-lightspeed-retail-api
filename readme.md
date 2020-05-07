@@ -62,13 +62,25 @@ Before we can request an access token you need to connect your Retail POS to thi
 You can manage the access level to your POS data via a scope. Choose a `$scope` from the options in `TimothyDC\LightspeedRetailApi\Scope`.
 More information on the scopes can be found in the [documentation][ls-docs-scopes].
 
+#### Via command line
+
+```bash
+$ php artisan retail:auth
+```
+
+The command will ask you about the scope.
+
+#### Via controller
+
+
+
 ```php
 use TimothyDC\LightspeedRetailApi\Scope;
-use TimothyDC\LightspeedRetailApi\LightspeedRetailApi;
+use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
 $scope = Scope::EMPLOYEE_ALL;
 
-return LightspeedRetailApi::redirectToAuthorizationPortal($scope);
+return redirect()->to(LightspeedRetailApi::redirectToAuthorizationPortal($scope));
 ```
 
 After requesting your initial access token you will be redirected to the `Redirect URI` 
@@ -115,7 +127,7 @@ Please see the [changelog](changelog.md) for more information on what has change
 
 ## Testing
 
-``` bash
+```bash
 $ composer test
 ```
 
