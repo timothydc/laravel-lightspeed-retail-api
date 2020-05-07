@@ -5,10 +5,10 @@ namespace TimothyDC\LightspeedRetailApi\Services\Lightspeed;
 
 use TimothyDC\LightspeedRetailApi\Traits\ResourceMethods;
 
-class ResourceCategory
+class ResourceItem
 {
     use ResourceMethods;
 
-    private string $resource = 'Category';
-    public string $primaryKey = 'categoryID';
+    private string $resource = 'Item';
+    public string $primaryKey = 'itemID';
 }

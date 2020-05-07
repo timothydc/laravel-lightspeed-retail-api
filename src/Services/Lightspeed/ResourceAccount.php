@@ -8,6 +8,7 @@ use TimothyDC\LightspeedRetailApi\Services\ApiClient;
 class ResourceAccount
 {
     private ApiClient $client;
+    public string $primaryKey = 'accountID';
 
     public function __construct(ApiClient $client)
     {

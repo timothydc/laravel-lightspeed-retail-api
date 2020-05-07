@@ -149,9 +149,12 @@ Update the array if you want to listen to other events.
 
 ```php
 use Illuminate\Database\Eloquent\Model;
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
 class Product extends Model
 {
+    use HasLightspeedRetailResources;
+
     public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
 }
 

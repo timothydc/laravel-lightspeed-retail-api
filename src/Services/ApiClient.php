@@ -8,12 +8,16 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
+use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
+use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Repositories\TokenRepository;
 use TimothyDC\LightspeedRetailApi\Traits\RetailResources;
 
@@ -68,17 +72,47 @@ class ApiClient
 
     public function post(string $resource, array $payload): Collection
     {
-        return collect();
+        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
+            ->withOptions(['handler' => $this->createHandlerStack()])
+            ->post($this->getUrl($resource), $payload);
+
+        $response = $responseObject->json();
+        if ($responseObject->clientError() || $responseObject->serverError()) {
+
+            // catch already existing resource error
+            if (Str::contains($response['message'], 'already exists')) {
+                throw new DuplicateResourceException($response['message'], $responseObject->status());
+            }
+
+            throw new LightspeedRetailException($response['message'], $responseObject->status());
+        }
+
+        return collect($response);
     }
 
     public function put(string $resource, int $id, array $payload): Collection
     {
-        return collect();
+        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
+            ->withOptions(['handler' => $this->createHandlerStack()])
+            ->put($this->getUrl($resource, $id), $payload);
+
+        $response = $responseObject->json();
+        if ($responseObject->clientError() || $responseObject->serverError()) {
+            throw new LightspeedRetailException($response['message'], $responseObject->status());
+        }
+
+        return collect($response);
     }
 
     public function delete(string $resource, int $id): Collection
     {
-        return collect();
+        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
+            ->withOptions(['handler' => $this->createHandlerStack()])
+            ->put($this->getUrl($resource, $id));
+
+        $response = $responseObject->json();
+
+        return collect($response);
     }
 
     private function getUrl(string $resource = null, int $id = null): string
@@ -120,17 +154,17 @@ class ApiClient
         ]);
     }
 
-    protected function requestRefreshToken(string $code): \Illuminate\Http\Client\Response
+    protected function requestRefreshToken(string $code): Response
     {
         return $this->requestToken($code, self::GRANT_TYPE_REFRESH_TOKEN);
     }
 
-    protected function requestAccessToken(string $code): \Illuminate\Http\Client\Response
+    protected function requestAccessToken(string $code): Response
     {
         return $this->requestToken($code, self::GRANT_TYPE_AUTHORIZATION_CODE);
     }
 
-    protected function requestToken($code, string $grantType): \Illuminate\Http\Client\Response
+    protected function requestToken($code, string $grantType): Response
     {
         $postFields = [
             'client_id' => $this->client_id,

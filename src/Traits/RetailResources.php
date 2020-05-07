@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
-use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceAccount;
-use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceCategory;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceAccount, ResourceCategory, ResourceItem};
 
 trait RetailResources
 {
@@ -16,5 +15,10 @@ trait RetailResources
     public function category(): ResourceCategory
     {
         return new ResourceCategory($this);
+    }
+
+    public function item(): ResourceItem
+    {
+        return new ResourceItem($this);
     }
 }
