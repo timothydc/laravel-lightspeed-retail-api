@@ -68,7 +68,7 @@ More information on the scopes can be found in the [documentation][ls-docs-scope
 $ php artisan retail:auth
 ```
 
-The command will ask you about the scope.
+The command will ask you about the scope, and you will get an URL in return. Excellent deal!
 
 #### Via controller
 
@@ -121,6 +121,42 @@ $categories = LightspeedRetailApi::api()->category()->get(20);
 $categories = LightspeedRetailApi::api()->category()->first(20);
 ```
 
+### Automatic model synchronisation
+If you would like to automatically synchronise your data to Lightspeed,
+you can add the `HasLightspeedRetailResources` trait to your model. 
+
+In `$lsRetailApiResourceMapping` you want to map your model fields to the Lightspeed resource.
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
+
+class Product extends Model
+{
+    use HasLightspeedRetailResources;
+
+    protected static array $lsRetailApiResourceMapping = [
+        // [resource].[resource column] => [your model property]
+        'Item.description' => 'name',
+        'Item.ean' => 'ean',
+        'Category.name' => 'category_text',
+    ];
+}
+```
+
+By default, the synchronisation process listens to your model events `created`, `updated` and `deleted`.
+Update the array if you want to listen to other events.
+
+```php
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
+}
+
+```
+
 ## Change log
 
 Please see the [changelog](changelog.md) for more information on what has changed recently.
@@ -142,6 +178,7 @@ If you discover any security related issues, please email mail@timothydc.be inst
 ## Credits
 
 - [Timothy De Cort][link-author]
+- [James Ratcliffe][link-james-ratcliffe] (https://github.com/jamesratcliffe/ls-retail-guzzle)
 - [All Contributors][link-contributors]
 
 ## License
@@ -164,3 +201,4 @@ MIT. Please see the [license file](license.md) for more information.
 [link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/timothydc
 [link-contributors]: ../../contributors
+[link-james-ratcliffe]: https://github.com/jamesratcliffe

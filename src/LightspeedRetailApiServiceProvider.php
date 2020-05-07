@@ -21,7 +21,7 @@ class LightspeedRetailApiServiceProvider extends ServiceProvider
         ], ['lightspeed-api', 'lightspeed-api:config']);
 
         $this->publishes([
-            __DIR__.'/../database/migrations/' => database_path('migrations')
+            __DIR__ . '/../database/migrations/' => database_path('migrations')
         ], ['lightspeed-api', 'lightspeed-api:migrations']);
     }
 
