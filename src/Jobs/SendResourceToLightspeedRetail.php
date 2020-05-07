@@ -15,7 +15,7 @@ use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationExceptio
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
-use TimothyDC\LightspeedRetailApi\Traits\ResourceMethods;
+use TimothyDC\LightspeedRetailApi\Resource;
 
 class SendResourceToLightspeedRetail implements ShouldQueue
 {
@@ -48,18 +48,20 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             throw new MissingLightspeedResourceException('Lightspeed resource [' . $this->resource . '] not defined');
         }
 
-        /** @var ResourceMethods $apiResource */
-        $apiResource = LightspeedRetailApi::api()->{strtolower($this->resource)}();
+        /** @var Resource $apiClientObject */
+        $apiClientObject = LightspeedRetailApi::api()->{strtolower($this->resource)}();
 
         // check if Lightspeed resource exists
         if ($this->model->lightspeedRetailResource()->exists() === false) {
 
             try {
                 // create new API resource
-                $lsProduct = $apiResource->create($this->payload);
+                $lsResource = $apiClientObject->create($this->payload);
+
             } catch (DuplicateResourceException $e) {
-                // TODO search for existing resource
-                // $lsProduct = $apiResource->get(null, $this->payload);
+                $lsResource = collect($apiClientObject->get(null, collect($this->payload)
+                    ->map(fn($param) => ['value' => $param])
+                    ->toArray())->first());
             }
 
             // save API resource
@@ -67,12 +69,12 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 'resource_id' => $this->model->getKey(),
                 'resource_type' => $this->model->getMorphClass(),
                 'lightspeed_type' => $this->resource,
-                'lightspeed_id' => $lsProduct->get($apiResource->primaryKey),
+                'lightspeed_id' => $lsResource->get($apiClientObject->primaryKey),
             ]);
 
         } else {
             // update API resource
-            $apiResource->update($this->model->lightspeedRetailResource()->first()->lightspeed_id, $this->payload);
+            $apiClientObject->update($this->model->lightspeedRetailResource()->first()->lightspeed_id, $this->payload);
         }
     }
 }

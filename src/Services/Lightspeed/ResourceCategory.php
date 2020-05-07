@@ -3,12 +3,10 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Services\Lightspeed;
 
-use TimothyDC\LightspeedRetailApi\Traits\ResourceMethods;
+use TimothyDC\LightspeedRetailApi\Resource;
 
-class ResourceCategory
+class ResourceCategory extends Resource
 {
-    use ResourceMethods;
-
-    private string $resource = 'Category';
+    protected string $resource = 'Category';
     public string $primaryKey = 'categoryID';
 }

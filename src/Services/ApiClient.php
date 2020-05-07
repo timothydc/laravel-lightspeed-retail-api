@@ -19,11 +19,12 @@ use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Repositories\TokenRepository;
+use TimothyDC\LightspeedRetailApi\Traits\QueryBuilder;
 use TimothyDC\LightspeedRetailApi\Traits\RetailResources;
 
 class ApiClient
 {
-    use RetailResources;
+    use RetailResources, QueryBuilder;
 
     const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
     const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
@@ -49,11 +50,11 @@ class ApiClient
         $this->tokenRepository = $tokenRepository;
     }
 
-    public function get(string $resource = null, int $id = null): Collection
+    public function get(string $resource = null, int $id = null, array $query = []): Collection
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])
             ->withOptions(['handler' => $this->createHandlerStack()])
-            ->get($this->getUrl($resource, $id));
+            ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
 
         $response = $responseObject->json();
 
@@ -70,6 +71,10 @@ class ApiClient
         return collect($response[$resource] ?? []);
     }
 
+    /**
+     * @throws DuplicateResourceException
+     * @throws LightspeedRetailException
+     */
     public function post(string $resource, array $payload): Collection
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])
@@ -90,6 +95,9 @@ class ApiClient
         return collect($response);
     }
 
+    /**
+     * @throws LightspeedRetailException
+     */
     public function put(string $resource, int $id, array $payload): Collection
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])
