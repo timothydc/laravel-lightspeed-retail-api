@@ -50,6 +50,11 @@ class ApiClient
         $this->tokenRepository = $tokenRepository;
     }
 
+    public function isConfigured(): bool
+    {
+        return $this->tokenRepository->exists();
+    }
+
     public function get(string $resource = null, int $id = null, array $query = []): Collection
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])

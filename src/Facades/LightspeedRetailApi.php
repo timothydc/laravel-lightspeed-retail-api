@@ -12,7 +12,8 @@ use TimothyDC\LightspeedRetailApi\Services\ApiClient;
  * @package TimothyDC\LightspeedRetailApi\Facades
  *
  * @method static ApiClient api
- * @method static ApiClient redirectToAuthorizationPortal(string $scopoe)
+ * @method static bool isApiClientConfigured()
+ * @method static string redirectToAuthorizationPortal(string $scopoe)
  */
 class LightspeedRetailApi extends Facade
 {

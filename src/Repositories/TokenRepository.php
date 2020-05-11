@@ -74,9 +74,10 @@ class TokenRepository implements TokenInterface
         return $token;
     }
 
-    public function exists(string $tokenType): bool
+    public function exists(): bool
     {
-        return $this->getToken() !== null;
+        return $this->table->getAttribute($this->keyIdentifier) === $this->tokenIdentifier
+           || (new $this->table())->where($this->keyIdentifier, $this->tokenIdentifier)->count() !== 0;
     }
 
     public function getAccessToken(): string

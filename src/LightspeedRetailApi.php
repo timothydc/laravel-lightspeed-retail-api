@@ -14,6 +14,11 @@ class LightspeedRetailApi
         $this->apiClient = $apiClient;
     }
 
+    public function isApiClientConfigured(): bool
+    {
+        return $this->apiClient->isConfigured() === true;
+    }
+
     public function api(): ApiClient
     {
         return $this->apiClient;

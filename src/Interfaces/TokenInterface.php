@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 interface TokenInterface
 {
-    public function exists(string $tokenType): bool;
+    public function exists(): bool;
 
     public function saveToken(array $data): Model;
 

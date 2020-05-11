@@ -10,12 +10,14 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use TimothyDC\LightspeedRetailApi\Actions\SaveLightspeedRetailResourceAction;
+use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationException;
+use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
-use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 use TimothyDC\LightspeedRetailApi\Resource;
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
 class SendResourceToLightspeedRetail implements ShouldQueue
 {
@@ -35,12 +37,24 @@ class SendResourceToLightspeedRetail implements ShouldQueue
     /**
      * @throws MissingLightspeedResourceException
      * @throws IncorrectModelConfigurationException
+     * @throws AuthenticationException
+     * @throws LightspeedRetailException
      */
     public function handle(SaveLightspeedRetailResourceAction $saveLightspeedRetailResourceAction): void
     {
         // check if morph method exists
         if (method_exists($this->model, 'lightspeedRetailResource') === false) {
             throw new IncorrectModelConfigurationException('Trait [' . HasLightspeedRetailResources::class . '] not found on model: ' . $this->model->getMorphClass());
+        }
+
+        // check if the client is configured
+        if (LightspeedRetailApi::isApiClientConfigured() === false) {
+            if (config('lightspeed-retail.exceptions.throw_on_unauthorized') === true) {
+                throw new AuthenticationException('Client not authenticated. No API token found.');
+            }
+
+            // silently fail
+            return;
         }
 
         // check if API resource method exists
