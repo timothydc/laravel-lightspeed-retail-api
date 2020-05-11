@@ -88,7 +88,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
         } else {
             // update API resource
-            $apiClientObject->update($this->model->lightspeedRetailResource()->first()->lightspeed_id, $this->payload);
+            $apiClientObject->update($this->model->lightspeedRetailResource->lightspeed_id, $this->payload);
         }
     }
 }

@@ -19,4 +19,9 @@ class LightspeedRetailResource extends Model
     {
         return $this->morphTo();
     }
+
+    public function getRetailLink(): string
+    {
+        return strtolower(sprintf('https://us.merchantos.com/?name=%s.views.%s&form_name=view&id=%d', $this->lightspeed_type, $this->lightspeed_type, $this->lightspeed_id));
+    }
 }

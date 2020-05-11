@@ -9,7 +9,7 @@ use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
 
 trait HasLightspeedRetailResources
 {
-    // public static array $lsRetailApiResourceMapping = ['API resource column (case sensitive)' => 'Your model column'];
+    // public static function lightspeedRetailResourceMapping() { return ['API resource column (case sensitive)' => 'Your model column']; }
     // public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
 
     public static function bootHasLightspeedRetailResources(): void
@@ -19,7 +19,7 @@ trait HasLightspeedRetailResources
 
     public static function listenToResourceEvents(): void
     {
-        if (property_exists(self::class, 'lsRetailApiResourceMapping') === false || empty(self::$lsRetailApiResourceMapping)) {
+        if (method_exists(self::class, 'lightspeedRetailResourceMapping') === false || empty(self::lightspeedRetailResourceMapping())) {
             return;
         }
 
@@ -27,7 +27,7 @@ trait HasLightspeedRetailResources
             return;
         }
 
-        $mapping = self::$lsRetailApiResourceMapping;
+        $mapping = collect(self::lightspeedRetailResourceMapping());
 
         foreach (self::$lsRetailApiTriggerEvents as $event) {
 
@@ -41,20 +41,21 @@ trait HasLightspeedRetailResources
                     return;
                 }
 
-                // support event specific columns
-                if (in_array($event, ['created', 'updated'])) {
-                    $mapping = $mapping[$event] ?? $mapping;
+                if ($model->isDirty($mapping->flatten(2)->toArray()) === false) {
+                    return;
                 }
 
-                if ($model->isDirty($mapping) === false) {
-                    return;
+                // support event specific columns
+                if (in_array($event, ['created', 'updated'])) {
+                    $mapping = $mapping->get($event, $mapping);
                 }
 
                 $payloads = [];
 
-                foreach ($mapping as $key => $value) {
-                    [$resource, $apiColumn] = explode('.', $key);
-                    $payloads[$resource][$apiColumn] = $model->$value;
+                foreach ($mapping as $resource => $resourceMapping) {
+                    foreach ($resourceMapping as $apiColumn => $value) {
+                        $payloads[$resource][$apiColumn] = $model->$value;
+                    }
                 }
 
                 foreach ($payloads as $resource => $payload) {

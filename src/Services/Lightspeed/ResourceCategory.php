@@ -7,6 +7,6 @@ use TimothyDC\LightspeedRetailApi\Resource;
 
 class ResourceCategory extends Resource
 {
-    protected string $resource = 'Category';
+    public static string $resource = 'Category';
     public string $primaryKey = 'categoryID';
 }
