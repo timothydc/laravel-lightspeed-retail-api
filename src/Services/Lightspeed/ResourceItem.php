@@ -13,7 +13,7 @@ class ResourceItem extends Resource
 
     public static string $description = 'description';
     public static string $ean = 'ean';
-    public static string $price = 'amount';
+    public static string $defaultPrice = 'amount';
 
     public function get(int $id = null, array $query = []): Collection
     {
@@ -28,14 +28,14 @@ class ResourceItem extends Resource
 
     public function update(int $id, array $payload): Collection
     {
-        if (array_key_exists(self::$price, $payload)) {
+        if (array_key_exists(self::$defaultPrice, $payload)) {
             $payload['Prices']['ItemPrice'][] = [
-                'amount' => $payload[self::$price],
+                'amount' => $payload[self::$defaultPrice],
                 'useTypeID' => 1,
                 'useType' => 'Default',
             ];
 
-            unset($payload[self::$price]);
+            unset($payload[self::$defaultPrice]);
         }
 
         return parent::update($id, $payload);
