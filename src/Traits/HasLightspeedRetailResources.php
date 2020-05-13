@@ -91,9 +91,8 @@ trait HasLightspeedRetailResources
         $payloads = collect($payloads);
         $initialPaylaod = $payloads->shift();
 
-        SendResourceToLightspeedRetail::withChain($payloads
-            ->map(fn($payload) => new SendResourceToLightspeedRetail($payload['model'], $payload['resource'], $payload['payload']))
-            ->toArray()
+        SendResourceToLightspeedRetail::withChain(
+            $payloads->map(fn($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray()
         )->dispatch(...array_values($initialPaylaod));
     }
 
