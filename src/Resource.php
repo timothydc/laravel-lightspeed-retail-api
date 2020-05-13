@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi;
 
 use Illuminate\Support\Collection;
+use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Services\ApiClient;
 
 class Resource
 {
-    private ApiClient $client;
+    protected ApiClient $client;
     public static string $resource;
 
     public string $primaryKey;
@@ -18,27 +19,35 @@ class Resource
         $this->client = $client;
     }
 
-    public function first(int $id): Collection
+    public function first(int $id, array $query = []): Collection
     {
-        return collect($this->get($id)->first());
+        return collect($this->get($id, $query)->first());
     }
 
     public function get(int $id = null, array $query = []): Collection
     {
         if ($id) {
-            return $this->client->get(static::$resource, $id);
+            return $this->client->get(static::$resource, $id, $query);
         }
 
         return $this->client->get(static::$resource, $id, $query);
     }
 
     /**
-     * @throws \TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
      */
     public function create(array $payload): Collection
     {
-        return $this->client->post(static::$resource, $payload);
+        try {
+            // create new API resource
+            return $this->client->post(static::$resource, $payload);
+
+        } catch (DuplicateResourceException $e) {
+            // request existing API resource
+            return $this->client->get(static::$resource, null, collect($payload)
+                ->map(fn($param) => ['value' => $param])
+                ->toArray())->first();
+        }
     }
 
     /**

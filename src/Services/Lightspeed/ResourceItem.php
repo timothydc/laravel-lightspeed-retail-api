@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Services\Lightspeed;
 
 use Illuminate\Support\Collection;
+use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Resource;
 
 class ResourceItem extends Resource
@@ -14,19 +15,40 @@ class ResourceItem extends Resource
     public static string $description = 'description';
     public static string $ean = 'ean';
     public static string $defaultPrice = 'amount';
+    public static string $manufacturerId = 'manufacturerID';
+    public static string $upc = 'upc';
 
-    public function get(int $id = null, array $query = []): Collection
+    /**
+     * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
+     */
+    public function create(array $payload): Collection
     {
-        if ($query) {
-            $query = collect($query)->only([$this->primaryKey, 'upc', 'ean']);
-        }
+        try {
+            // create new API resource
+            return $this->client->post(static::$resource, $this->formatPayload($payload));
 
-        return parent::get($id, $query->mapWithKeys(fn($param) => [
-            'itemCode' => ['value' => $param['value'], 'operator' => '='],
-        ])->toArray());
+        } catch (DuplicateResourceException $e) {
+            // request existing API resource
+            return $this->client->get(static::$resource, null, collect($this->formatPayload($payload))
+                ->only([$this->primaryKey, self::$upc, self::$ean])
+                ->mapWithKeys(fn($param) => ['itemCode' => ['operator' => '=', 'value' => $param['value']]])
+                ->toArray())
+                ->first();
+        }
     }
 
     public function update(int $id, array $payload): Collection
+    {
+        return parent::update($id, $this->formatPayload($payload));
+    }
+
+    protected function formatPayload(array $payload): array
+    {
+        $payload = $this->adjustPricePayload($payload);
+        return $payload;
+    }
+
+    private function adjustPricePayload(array $payload): array
     {
         if (array_key_exists(self::$defaultPrice, $payload)) {
             $payload['Prices']['ItemPrice'][] = [
@@ -38,6 +60,6 @@ class ResourceItem extends Resource
             unset($payload[self::$defaultPrice]);
         }
 
-        return parent::update($id, $payload);
+        return $payload;
     }
 }

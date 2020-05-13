@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
 use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
 
@@ -54,16 +55,46 @@ trait HasLightspeedRetailResources
 
                 foreach ($mapping as $resource => $resourceMapping) {
                     foreach ($resourceMapping as $apiColumn => $value) {
-                        $payloads[$resource][$apiColumn] = $model->$value;
+
+                        // default mapping -> the order of these parameters is important
+                        $payloads[$resource]['model'] = $model;
+                        $payloads[$resource]['resource'] = $resource;
+                        $payloads[$resource]['payload'][$apiColumn] = $model->$value;
+
+                        if (Str::contains($value, '.id') === true) {
+                            // mapping for foreignkeys
+                            $payloads[$resource]['model'] = $model;
+                            $payloads[$resource]['payload'][$apiColumn] = $value;
+
+                        } elseif (Str::contains($value, '.') === true) {
+                            // mapping for relationship
+                            [$relation, $relationValue] = explode('.', $value, 2);
+
+                            // check that the relation exists and isn't NULL
+                            if (method_exists($model, $relation) === false || $model->$relation === null) {
+                                continue;
+                            }
+
+                            $payloads[$resource]['model'] = $model->$relation;
+                            $payloads[$resource]['payload'][$apiColumn] = $model->$relation->$relationValue;
+                        }
                     }
                 }
 
-                foreach ($payloads as $resource => $payload) {
-                    SendResourceToLightspeedRetail::dispatchNow($model, $resource, $payload);
-                }
-
+                $model->sendResourceToLightspeedRetail($payloads);
             });
         }
+    }
+
+    protected function sendResourceToLightspeedRetail(array $payloads)
+    {
+        $payloads = collect($payloads);
+        $initialPaylaod = $payloads->shift();
+
+        SendResourceToLightspeedRetail::withChain($payloads
+            ->map(fn($payload) => new SendResourceToLightspeedRetail($payload['model'], $payload['resource'], $payload['payload']))
+            ->toArray()
+        )->dispatch(...array_values($initialPaylaod));
     }
 
     public function lightspeedRetailResource(): MorphOne

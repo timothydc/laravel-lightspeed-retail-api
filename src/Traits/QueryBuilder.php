@@ -14,6 +14,8 @@ trait QueryBuilder
     private string $operator_not_equal = '!=';
     private string $operator_like = '~';
     private string $operator_not_like = '!~';
+    private string $operator_in = 'IN';
+    private string $operator_or = 'or';
 
     private function operatorMapping(): array
     {
@@ -27,8 +29,8 @@ trait QueryBuilder
             $this->operator_not_equal => '!%3D',
             $this->operator_like => '~',
             $this->operator_not_like => '!~',
-            'IN' => 'IN',
-            'or' => 'or',
+            $this->operator_in => 'IN',
+            $this->operator_or => 'or',
         ];
     }
 
@@ -44,8 +46,13 @@ trait QueryBuilder
 
         foreach ($parameters as $column => $query) {
 
-            if (is_array($query) && !array_key_exists('operator', $query)) {
+            if ($column === 'load_relations' && is_array($query)) {
                 $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . sprintf('["%s"]', implode(',', $query));
+                continue;
+            }
+
+            if (is_array($query) && !array_key_exists('operator', $query)) {
+                $queryParameters[] = $column . $this->_getOperator($this->operator_in) . sprintf('["%s"]', implode(',', $query));
                 continue;
             }
 

@@ -97,7 +97,7 @@ class ApiClient
             throw new LightspeedRetailException($response['message'], $responseObject->status());
         }
 
-        return collect($response);
+        return collect($response[$resource]);
     }
 
     /**
