@@ -125,22 +125,31 @@ $categories = LightspeedRetailApi::api()->category()->first(20);
 If you would like to automatically synchronise your data to Lightspeed,
 you can add the `HasLightspeedRetailResources` trait to your model. 
 
-In `$lsRetailApiResourceMapping` you want to map your model fields to the Lightspeed resource.
+In `lightspeedRetailResourceMapping()` you want to map your model fields to the Lightspeed resource.
+The order of the resources is the order of the synchronisation.
+In the example below we put the manufacturer resource before the product resource
+because we need the `manufacturer id` for when we are syncing the product.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceItem, ResourceManufacturer};
 
-class Product extends Model
+class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
-    protected static array $lsRetailApiResourceMapping = [
-        // [resource].[resource column] => [your model property]
-        'Item.description' => 'name',
-        'Item.ean' => 'ean',
-        'Category.name' => 'category_text',
-    ];
+    public static function lightspeedRetailResourceMapping(): array
+    {
+        return [
+            ResourceManufacturer::$resource => [
+                ResourceManufacturer::$name => 'manufacturer.name'
+            ],
+            ResourceItem::$resource => [
+                ResourceItem::$description => 'name',
+                ResourceItem::$manufacturerId => 'manufacturer.id',
+            ],
+        ];
+    }
 }
 ```
 
@@ -148,10 +157,9 @@ By default, the synchronisation process listens to your model events `created`, 
 Update the array if you want to listen to other events.
 
 ```php
-use Illuminate\Database\Eloquent\Model;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
-class Product extends Model
+class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
