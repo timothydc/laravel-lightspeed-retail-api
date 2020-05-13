@@ -27,6 +27,16 @@ _Bummer, I know._
 The API client is developer friendly, you can set `http://localhost:8080` as your redirect URI.
 Remember the value of your redirect URI, we will need it later on.
 
+
+### Configure .env
+
+After your API client is approved you will receive a `key` and `secret`. Add those values to your `.env` file.
+
+```bash
+LIGHTSPEED_RETAIL_API_KEY=xxx
+LIGHTSPEED_RETAIL_API_SECRET=xxx
+```
+
 ### Publish resources
 
 You can publish all resources, or you may choose to publish them separately:
@@ -52,13 +62,25 @@ Before we can request an access token you need to connect your Retail POS to thi
 You can manage the access level to your POS data via a scope. Choose a `$scope` from the options in `TimothyDC\LightspeedRetailApi\Scope`.
 More information on the scopes can be found in the [documentation][ls-docs-scopes].
 
+#### Via command line
+
+```bash
+$ php artisan retail:auth
+```
+
+The command will ask you about the scope, and you will get an URL in return. Excellent deal!
+
+#### Via controller
+
+
+
 ```php
 use TimothyDC\LightspeedRetailApi\Scope;
-use TimothyDC\LightspeedRetailApi\LightspeedRetailApi;
+use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
 $scope = Scope::EMPLOYEE_ALL;
 
-return LightspeedRetailApi::redirectToAuthorizationPortal($scope);
+return redirect()->to(LightspeedRetailApi::redirectToAuthorizationPortal($scope));
 ```
 
 After requesting your initial access token you will be redirected to the `Redirect URI` 
@@ -84,12 +106,66 @@ If you would like to alter the redirect you may extend this controller.
 
 ### Make API calls
 
-You can now access the API.
+You can now access the API. All resources return a [Laravel collection][laravel-docs-collections]... which means lots of fun!
 
 ```php
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
+// get all
 $account = LightspeedRetailApi::api()->account()->get();
+
+// get category with ID 20
+$categories = LightspeedRetailApi::api()->category()->get(20);
+
+// same as above, but better
+$categories = LightspeedRetailApi::api()->category()->first(20);
+```
+
+### Automatic model synchronisation
+If you would like to automatically synchronise your data to Lightspeed,
+you can add the `HasLightspeedRetailResources` trait to your model. 
+
+In `lightspeedRetailResourceMapping()` you want to map your model fields to the Lightspeed resource.
+The order of the resources is the order of the synchronisation.
+In the example below we put the manufacturer resource before the product resource
+because we need the `manufacturer id` for when we are syncing the product.
+
+```php
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceItem, ResourceManufacturer};
+
+class Product extends \Illuminate\Database\Eloquent\Model
+{
+    use HasLightspeedRetailResources;
+
+    public static function lightspeedRetailResourceMapping(): array
+    {
+        return [
+            ResourceManufacturer::$resource => [
+                ResourceManufacturer::$name => 'manufacturer.name'
+            ],
+            ResourceItem::$resource => [
+                ResourceItem::$description => 'name',
+                ResourceItem::$manufacturerId => 'manufacturer.id',
+            ],
+        ];
+    }
+}
+```
+
+By default, the synchronisation process listens to your model events `created`, `updated` and `deleted`.
+Update the array if you want to listen to other events.
+
+```php
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
+
+class Product extends \Illuminate\Database\Eloquent\Model
+{
+    use HasLightspeedRetailResources;
+
+    public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
+}
+
 ```
 
 ## Change log
@@ -98,7 +174,7 @@ Please see the [changelog](changelog.md) for more information on what has change
 
 ## Testing
 
-``` bash
+```bash
 $ composer test
 ```
 
@@ -113,6 +189,7 @@ If you discover any security related issues, please email mail@timothydc.be inst
 ## Credits
 
 - [Timothy De Cort][link-author]
+- [James Ratcliffe][link-james-ratcliffe] (https://github.com/jamesratcliffe/ls-retail-guzzle)
 - [All Contributors][link-contributors]
 
 ## License
@@ -123,6 +200,7 @@ MIT. Please see the [license file](license.md) for more information.
 [ls-docs-scopes]: https://developers.lightspeedhq.com/retail/authentication/scopes
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
+[laravel-docs-collections]: https://laravel.com/docs/7.x/collections
 [ico-version]: https://img.shields.io/packagist/v/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/timothydc/laravel-lightspeed-retail-api/master.svg?style=flat-square
@@ -134,3 +212,4 @@ MIT. Please see the [license file](license.md) for more information.
 [link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/timothydc
 [link-contributors]: ../../contributors
+[link-james-ratcliffe]: https://github.com/jamesratcliffe
