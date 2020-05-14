@@ -101,7 +101,6 @@ trait HasLightspeedRetailResources
         }
     }
 
-
     public function lightspeedRetailResource(): MorphOne
     {
         return $this->morphOne(LightspeedRetailResource::class, 'resource');

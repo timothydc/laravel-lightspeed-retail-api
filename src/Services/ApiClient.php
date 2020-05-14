@@ -61,6 +61,8 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
 
+        $this->logAction('get', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+
         $response = $responseObject->json();
 
         // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
@@ -86,6 +88,8 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->post($this->getUrl($resource), $payload);
 
+        $this->logAction('post', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
 
@@ -110,6 +114,8 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->put($this->getUrl($resource, $id), $payload);
 
+        $this->logAction('put', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
             Log::error($response['message'], ['method' => 'put', 'url' => $this->getUrl($resource, $id), 'payload' => $payload]);
@@ -125,9 +131,18 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->put($this->getUrl($resource, $id));
 
+        $this->logAction('delete', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+
         $response = $responseObject->json();
 
         return collect($response);
+    }
+
+    private function logAction(string $method, array $data)
+    {
+        if (config('lightspeed-retail.api.logging')) {
+            Log::debug('Lightspeed Retail: ' . $method, $data);
+        }
     }
 
     private function getUrl(string $resource = null, int $id = null): string
