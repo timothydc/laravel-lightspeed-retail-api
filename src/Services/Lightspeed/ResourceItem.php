@@ -25,8 +25,17 @@ class ResourceItem extends Resource
     public function create(array $payload): Collection
     {
         try {
+            $originalPayload = $payload;
+
             // create new API resource
-            return $this->client->post(static::$resource, $this->formatPayload($payload));
+            $response = $this->client->post(static::$resource, $this->formatPayload($payload));
+
+            // instantly archive item if needed
+            if (array_key_exists(self::$archived, $originalPayload) && $originalPayload[self::$archived] === true) {
+                $this->delete((int)$response->get($this->primaryKey));
+            }
+
+            return $response;
 
         } catch (DuplicateResourceException $e) {
             // request existing API resource
@@ -50,11 +59,15 @@ class ResourceItem extends Resource
         return $payload;
     }
 
-    private function filterOutArchive(int $id, array $payload): array
+    private function filterOutArchive(?int $id, array $payload): array
     {
         if (array_key_exists(self::$archived, $payload) && $payload[self::$archived] === true) {
+            // remove archive parameter from payload
             unset($payload[self::$archived]);
-            $this->delete($id);
+
+            if ($id) {
+                $this->delete($id);
+            }
         }
 
         return $payload;
