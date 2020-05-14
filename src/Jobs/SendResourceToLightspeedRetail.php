@@ -45,10 +45,15 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             return;
         }
 
-        $this->processRelationship();
+        $this->loadRelationship();
 
         // check if Lightspeed resource exists
         if ($this->model->lightspeedRetailResource()->exists() === false) {
+
+            // filter out empty data when creating new resources
+            if ($this->validatePayloadForCreateRequest() === false) {
+                return;
+            }
 
             // create new API resource
             $lsResource = $this->getApiClientobject()->create($this->payload);
@@ -72,14 +77,25 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         return LightspeedRetailApi::api()->{strtolower($this->resource)}();
     }
 
-    private function processRelationship(): void
+    private function validatePayloadForCreateRequest(): bool
+    {
+        $this->payload = collect($this->payload)->filter(fn($data) => $data !== null)->toArray();
+
+        if (empty($this->payload)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function loadRelationship(): void
     {
         // replace relationships
         $relations = collect($this->payload)->filter(fn($item) => Str::contains($item, '.id'));
 
         foreach ($relations as $lightspeedForeignKey => $localeForeignKey) {
             [$relatedObject] = explode('.id', $localeForeignKey);
-            $this->payload[$lightspeedForeignKey] = $this->model->$relatedObject->lightspeedRetailResource->lightspeed_id;
+            $this->payload[$lightspeedForeignKey] = $this->model->$relatedObject()->first()->lightspeedRetailResource->lightspeed_id;
         }
     }
 

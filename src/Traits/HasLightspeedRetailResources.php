@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
 use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
@@ -56,17 +57,7 @@ trait HasLightspeedRetailResources
                 foreach ($mapping as $resource => $resourceMapping) {
                     foreach ($resourceMapping as $apiColumn => $value) {
 
-                        // default mapping -> the order of these parameters is important
-                        $payloads[$resource]['model'] = $model;
-                        $payloads[$resource]['resource'] = $resource;
-                        $payloads[$resource]['payload'][$apiColumn] = $model->$value;
-
-                        if (Str::contains($value, '.id') === true) {
-                            // mapping for foreignkeys
-                            $payloads[$resource]['model'] = $model;
-                            $payloads[$resource]['payload'][$apiColumn] = $value;
-
-                        } elseif (Str::contains($value, '.') === true) {
+                       if (Str::contains($value, '.') === true) {
                             // mapping for relationship
                             [$relation, $relationValue] = explode('.', $value, 2);
 
@@ -76,7 +67,14 @@ trait HasLightspeedRetailResources
                             }
 
                             $payloads[$resource]['model'] = $model->$relation;
+                            $payloads[$resource]['resource'] = $resource;
                             $payloads[$resource]['payload'][$apiColumn] = $model->$relation->$relationValue;
+
+                        } else {
+                            // default mapping -> the order of these parameters is important
+                            $payloads[$resource]['model'] = $model;
+                            $payloads[$resource]['resource'] = $resource;
+                            $payloads[$resource]['payload'][$apiColumn] = $model->$value;
                         }
                     }
                 }
@@ -89,6 +87,11 @@ trait HasLightspeedRetailResources
     protected function sendResourceToLightspeedRetail(array $payloads)
     {
         $payloads = collect($payloads);
+
+        if ($payloads->isEmpty()) {
+            return;
+        }
+
         $initialPaylaod = $payloads->shift();
 
         SendResourceToLightspeedRetail::withChain(

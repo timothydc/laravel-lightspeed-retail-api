@@ -94,6 +94,7 @@ class ApiClient
                 throw new DuplicateResourceException($response['message'], $responseObject->status());
             }
 
+            Log::error($response['message'], ['method' => 'put', 'url' => $this->getUrl($resource), 'payload' => $payload]);
             throw new LightspeedRetailException($response['message'], $responseObject->status());
         }
 
@@ -111,6 +112,7 @@ class ApiClient
 
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
+            Log::error($response['message'], ['method' => 'put', 'url' => $this->getUrl($resource, $id), 'payload' => $payload]);
             throw new LightspeedRetailException($response['message'], $responseObject->status());
         }
 
