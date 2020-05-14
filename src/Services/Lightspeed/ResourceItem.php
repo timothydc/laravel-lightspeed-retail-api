@@ -17,6 +17,7 @@ class ResourceItem extends Resource
     public static string $defaultPrice = 'amount';
     public static string $manufacturerId = 'manufacturerID';
     public static string $upc = 'upc';
+    public static string $archived = 'archived';
 
     /**
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
@@ -39,12 +40,23 @@ class ResourceItem extends Resource
 
     public function update(int $id, array $payload): Collection
     {
-        return parent::update($id, $this->formatPayload($payload));
+        return parent::update($id, $this->formatPayload($payload, $id));
     }
 
-    protected function formatPayload(array $payload): array
+    protected function formatPayload(array $payload, int $id = null): array
     {
+        $payload = $this->filterOutArchive($id, $payload);
         $payload = $this->adjustPricePayload($payload);
+        return $payload;
+    }
+
+    private function filterOutArchive(int $id, array $payload): array
+    {
+        if (array_key_exists(self::$archived, $payload) && $payload[self::$archived] === true) {
+            unset($payload[self::$archived]);
+            $this->delete($id);
+        }
+
         return $payload;
     }
 

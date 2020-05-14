@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
 use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
@@ -43,21 +42,27 @@ trait HasLightspeedRetailResources
                     return;
                 }
 
-                if ($model->isDirty($mapping->flatten(2)->toArray()) === false) {
-                    return;
-                }
-
                 // support event specific columns
                 if (in_array($event, ['created', 'updated'])) {
                     $mapping = $mapping->get($event, $mapping);
                 }
 
+                if ($model->isDirty($mapping->flatten(2)->toArray()) === false) {
+                    return;
+                }
+
                 $payloads = [];
 
+                // convert mapping to Lightspeed Retail paylaod
                 foreach ($mapping as $resource => $resourceMapping) {
                     foreach ($resourceMapping as $apiColumn => $value) {
 
-                       if (Str::contains($value, '.') === true) {
+                        // map the "dirty" column with the mutated value
+                        if (is_array($value)) {
+                            $value = last($value);
+                        }
+
+                        if (Str::contains($value, '.') === true) {
                             // mapping for relationship
                             [$relation, $relationValue] = explode('.', $value, 2);
 
@@ -79,25 +84,23 @@ trait HasLightspeedRetailResources
                     }
                 }
 
-                $model->sendResourceToLightspeedRetail($payloads);
+                if (empty($payloads)) {
+                    return;
+                }
+
+                $payloads = collect($payloads);
+
+                // send payload to processor
+                if (config('lightspeed-retail.api.async') === true) {
+                    SendResourceToLightspeedRetail::dispatch(...array_values($payloads->shift()))->chain($payloads->map(fn($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray());
+
+                } else {
+                    $payloads->each(fn($payload) => SendResourceToLightspeedRetail::dispatchNow(...array_values($payload)));
+                }
             });
         }
     }
 
-    protected function sendResourceToLightspeedRetail(array $payloads)
-    {
-        $payloads = collect($payloads);
-
-        if ($payloads->isEmpty()) {
-            return;
-        }
-
-        $initialPaylaod = $payloads->shift();
-
-        SendResourceToLightspeedRetail::withChain(
-            $payloads->map(fn($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray()
-        )->dispatch(...array_values($initialPaylaod));
-    }
 
     public function lightspeedRetailResource(): MorphOne
     {

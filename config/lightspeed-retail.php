@@ -5,6 +5,7 @@ return [
     'api' => [
         'key' => env('LIGHTSPEED_RETAIL_API_KEY'),
         'secret' => env('LIGHTSPEED_RETAIL_API_SECRET'),
+        'async' => env('LIGHTSPEED_RETAIL_USE_ASYNC_QUEUE', true)
     ],
     'exceptions' => [
         /*
