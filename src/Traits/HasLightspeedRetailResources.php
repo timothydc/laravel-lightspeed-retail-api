@@ -73,7 +73,7 @@ trait HasLightspeedRetailResources
 
                             $payloads[$resource]['model'] = $model->$relation;
                             $payloads[$resource]['resource'] = $resource;
-                            $payloads[$resource]['payload'][$apiColumn] = $model->$relation->$relationValue;
+                            $payloads[$resource]['payload'][$apiColumn] = Str::contains($value, '.id') === true ? $value : $model->$relation->$relationValue;
 
                         } else {
                             // default mapping -> the order of these parameters is important
