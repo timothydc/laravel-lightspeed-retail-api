@@ -60,6 +60,6 @@ class Resource
 
     public function delete(int $id): Collection
     {
-        return $this->client->delete(self::$resource, $id);
+        return $this->client->delete(static::$resource, $id);
     }
 }

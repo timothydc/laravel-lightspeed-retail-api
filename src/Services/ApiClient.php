@@ -129,7 +129,7 @@ class ApiClient
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])
             ->withOptions(['handler' => $this->createHandlerStack()])
-            ->put($this->getUrl($resource, $id));
+            ->delete($this->getUrl($resource, $id));
 
         $this->logAction('delete', ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
