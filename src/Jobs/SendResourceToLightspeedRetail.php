@@ -16,6 +16,7 @@ use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationExceptio
 use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
 class SendResourceToLightspeedRetail implements ShouldQueue
@@ -55,6 +56,10 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 return;
             }
 
+            if ($this->allowedToCreateArchivedItems($this->payload) === false) {
+                return;
+            }
+
             // create new API resource
             $lsResource = $this->getApiClientobject()->create($this->payload);
 
@@ -86,6 +91,13 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         }
 
         return true;
+    }
+
+    private function allowedToCreateArchivedItems(array $payload): bool
+    {
+        return array_key_exists(ResourceItem::$archived, $payload)
+            && $payload[ResourceItem::$archived] === false
+            && config('lightspeed-retail.behavior.allow_archive_on_create') === true;
     }
 
     private function loadRelationship(): void
