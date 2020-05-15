@@ -62,13 +62,19 @@ class ResourceItem extends Resource
 
     private function filterOutArchive(?int $id, array $payload): array
     {
-        if (array_key_exists(self::$archived, $payload) && $payload[self::$archived] === true) {
-            // remove archive parameter from payload
-            unset($payload[self::$archived]);
+        // no "archived" == no problem
+        if (array_key_exists(self::$archived, $payload) === false) {
+            return $payload;
+        }
 
-            if ($id) {
-                $this->delete($id);
-            }
+        // no "id" means we are doing a POST request, which can't handle the "archived" parameter
+        if (is_null($id)) {
+            unset($payload[self::$archived]);
+            return $payload;
+
+        } elseif ($payload[self::$archived] === true) {
+            unset($payload[self::$archived]);
+            $this->delete($id);
         }
 
         return $payload;
