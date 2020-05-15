@@ -56,7 +56,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 return;
             }
 
-            if ($this->allowedToCreateArchivedItems($this->payload) === false) {
+            if ($this->allowedToCreateArchivedItems() === false) {
                 return;
             }
 
@@ -93,11 +93,12 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         return true;
     }
 
-    private function allowedToCreateArchivedItems(array $payload): bool
+    private function allowedToCreateArchivedItems(): bool
     {
-        return array_key_exists(ResourceItem::$archived, $payload)
-            && $payload[ResourceItem::$archived] === false
-            && config('lightspeed-retail.behavior.allow_archive_on_create') === true;
+        return $this->resource !== ResourceItem::$resource
+            || (array_key_exists(ResourceItem::$archived, $this->payload)
+                && $this->payload[ResourceItem::$archived] === false
+                && config('lightspeed-retail.behavior.allow_archive_on_create') === true);
     }
 
     private function loadRelationship(): void
