@@ -130,6 +130,7 @@ The order of the resources is the order of the synchronisation.
 In the example below we put the manufacturer resource before the product resource
 because we need the `manufacturer id` for when we are syncing the product.
 
+Don't forget to add the `HasLightspeedRetailResources` trait to your `manufacturer` resource too.
 ```php
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceItem, ResourceManufacturer};
@@ -146,10 +147,22 @@ class Product extends \Illuminate\Database\Eloquent\Model
             ],
             ResourceItem::$resource => [
                 ResourceItem::$description => 'name',
-                ResourceItem::$manufacturerId => 'manufacturer.id',
+                ResourceItem::$manufacturerId => ['manufacturer_id', 'manufacturer.id'],
+                ResourceItem::$archived => ['active', 'archive'],
             ],
         ];
     }
+}
+```
+
+You will notice some resources in the mapping have an array value.
+The first item in the array references the value which will be checked for a change,
+The second item is the value that will be sent to Lightspeed. It also accepts [mutators][ls-docs-mutators]:
+    
+```php
+public function getArchivedAttribute(): bool
+{
+    return $this->attributes['active'] === false;
 }
 ```
 
@@ -172,12 +185,6 @@ class Product extends \Illuminate\Database\Eloquent\Model
 
 Please see the [changelog](changelog.md) for more information on what has changed recently.
 
-## Testing
-
-```bash
-$ composer test
-```
-
 ## Contributing
 
 Please see [contributing.md](contributing.md) for details and a todolist.
@@ -198,6 +205,7 @@ MIT. Please see the [license file](license.md) for more information.
 
 [ls-docs]: https://developers.lightspeedhq.com/retail/introduction/introduction/
 [ls-docs-scopes]: https://developers.lightspeedhq.com/retail/authentication/scopes
+[ls-docs-mutators]: https://laravel.com/docs/eloquent-mutators#defining-an-accessor
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
 [laravel-docs-collections]: https://laravel.com/docs/7.x/collections
