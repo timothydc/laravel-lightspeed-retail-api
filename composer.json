@@ -12,7 +12,7 @@
     "keywords": ["timothydc", "lightspeed", "retail", "laravel"],
     "require": {
         "php": "^7.4"
-    }
+    },
     "autoload": {
         "psr-4": {
             "TimothyDC\\LightspeedRetailApi\\": "src/"
