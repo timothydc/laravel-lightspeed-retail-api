@@ -16,6 +16,7 @@ class ResourceItem extends Resource
     public static string $ean = 'ean';
     public static string $defaultPrice = 'amount';
     public static string $manufacturerId = 'manufacturerID';
+    public static string $vendorId = 'defaultVendorID';
     public static string $upc = 'upc';
     public static string $archived = 'archived';
 
