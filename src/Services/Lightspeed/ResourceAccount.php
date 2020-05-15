@@ -9,6 +9,7 @@ use TimothyDC\LightspeedRetailApi\Resource;
 
 class ResourceAccount extends Resource
 {
+    public static string $resource = '';
     public string $primaryKey = 'accountID';
 
     public function get(int $id = null, array $query = []): Collection
