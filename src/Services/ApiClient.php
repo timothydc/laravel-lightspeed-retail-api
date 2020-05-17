@@ -65,14 +65,14 @@ class ApiClient
 
         $response = $responseObject->json();
 
+        // unstructured way of requesting the "Account" resource
+        if (!$resource) {
+            return collect($response['Account']);
+        }
+
         // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
         if ($response['@attributes']['count'] ?? false && $response['@attributes']['count'] === 1) {
             $response[$resource] = [$response[$resource]];
-        }
-
-        // unstructured way of requesting the "Account" resource
-        if ($resource === null) {
-            return collect($response['@attributes']);
         }
 
         return collect($response[$resource] ?? []);
@@ -147,6 +147,10 @@ class ApiClient
 
     private function getUrl(string $resource = null, int $id = null): string
     {
+        if (!$resource) {
+            return $this->baseUrl;
+        }
+
         return $this->baseUrl . $this->tokenRepository->getAccountId() . ($resource ? '/' . $resource : '') . ($id ? '/' . $id : '');
     }
 
@@ -160,7 +164,7 @@ class ApiClient
         $this->storeInitialAccessToken($code);
 
         // save account id
-        $this->tokenRepository->saveToken(['account_id' => $this->account()->get()->get('systemCustomerID')]);
+        $this->tokenRepository->saveToken(['account_id' => $this->account()->get()->get('accountID')]);
     }
 
     /**

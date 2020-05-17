@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class LightspeedRetailResource extends Model
 {
+    protected $casts = [
+        'resource_id' => 'integer',
+        'lightspeed_id' => 'integer',
+    ];
+
     protected $fillable = [
         'resource_id',
         'resource_type',
