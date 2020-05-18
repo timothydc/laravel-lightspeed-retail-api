@@ -133,7 +133,7 @@ because we need the `manufacturer id` for when we are syncing the product.
 Don't forget to add the `HasLightspeedRetailResources` trait to your `manufacturer` resource too.
 ```php
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
-use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceItem, ResourceManufacturer};
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceItem, ResourceVendor};
 
 class Product extends \Illuminate\Database\Eloquent\Model
 {
@@ -142,8 +142,8 @@ class Product extends \Illuminate\Database\Eloquent\Model
     public static function lightspeedRetailResourceMapping(): array
     {
         return [
-            ResourceManufacturer::$resource => [
-                ResourceManufacturer::$name => 'manufacturer.name'
+            ResourceVendor::$resource => [
+                ResourceVendor::$name => 'product_vendor'
             ],
             ResourceItem::$resource => [
                 ResourceItem::$description => 'name',
@@ -158,6 +158,9 @@ class Product extends \Illuminate\Database\Eloquent\Model
 You will notice some resources in the mapping have an array value.
 The first item in the array references the value which will be checked for a change,
 The second item is the value that will be sent to Lightspeed. It also accepts [mutators][ls-docs-mutators]:
+
+In case of a relationship, the first value is the local foreign key.
+The second, is the related primary key.
     
 ```php
 public function getArchivedAttribute(): bool

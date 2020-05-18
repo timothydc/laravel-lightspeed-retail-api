@@ -108,7 +108,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
         foreach ($relations as $lightspeedForeignKey => $localeForeignKey) {
             [$relatedObject] = explode('.id', $localeForeignKey);
-            $this->payload[$lightspeedForeignKey] = $this->model->$relatedObject()->first()->lightspeedRetailResource->lightspeed_id;
+            $this->payload[$lightspeedForeignKey] = optional($this->model->$relatedObject()->first(), fn($model) => $model->lightspeedRetailResource->lightspeed_id);
         }
     }
 
