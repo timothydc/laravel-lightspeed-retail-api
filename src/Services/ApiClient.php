@@ -61,7 +61,7 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
 
-        $this->logAction('get', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+        $this->logAction('GET ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
         $response = $responseObject->json();
 
@@ -88,7 +88,7 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->post($this->getUrl($resource), $payload);
 
-        $this->logAction('post', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+        $this->logAction('POST ' . $this->getUrl($resource), ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
@@ -114,7 +114,7 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->put($this->getUrl($resource, $id), $payload);
 
-        $this->logAction('put', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+        $this->logAction('PUT ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
@@ -131,7 +131,7 @@ class ApiClient
             ->withOptions(['handler' => $this->createHandlerStack()])
             ->delete($this->getUrl($resource, $id));
 
-        $this->logAction('delete', ['params' => func_get_args(), 'status' => $responseObject->status()]);
+        $this->logAction('DELETE ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
         $response = $responseObject->json();
 
