@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
@@ -36,7 +37,7 @@ trait HasLightspeedRetailResources
                 continue;
             }
 
-            static::$event(function ($model) use ($event, $mapping) {
+            static::$event(function (Model $model) use ($event, $mapping) {
                 if ($event === 'deleted') {
                     // TODO remove resource from LS retail
                     return;
@@ -71,13 +72,14 @@ trait HasLightspeedRetailResources
                                 continue;
                             }
 
-                            $payloads[$resource]['model'] = $model->$relation;
+                            $freshRelation = $model->$relation()->first();
+                            $payloads[$resource]['model'] = $freshRelation;
                             $payloads[$resource]['resource'] = $resource;
-                            $payloads[$resource]['payload'][$apiColumn] = Str::contains($value, '.id') === true ? $value : $model->$relation->$relationValue;
+                            $payloads[$resource]['payload'][$apiColumn] = Str::contains($value, '.id') === true ? $value : $freshRelation->$relationValue;
 
                         } else {
                             // default mapping -> the order of these parameters is important
-                            $payloads[$resource]['model'] = $model;
+                            $payloads[$resource]['model'] = $model->withoutRelations();
                             $payloads[$resource]['resource'] = $resource;
                             $payloads[$resource]['payload'][$apiColumn] = $model->$value;
                         }
