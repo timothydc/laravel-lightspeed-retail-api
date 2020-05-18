@@ -5,7 +5,7 @@ namespace TimothyDC\LightspeedRetailApi\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
-use Illuminate\Support\Str;
+use TimothyDC\LightspeedRetailApi\Actions\GenerateRetailPayloadAction;
 use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
 use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
 
@@ -21,10 +21,6 @@ trait HasLightspeedRetailResources
 
     public static function listenToResourceEvents(): void
     {
-        if (method_exists(self::class, 'lightspeedRetailResourceMapping') === false || empty(self::lightspeedRetailResourceMapping())) {
-            return;
-        }
-
         if (property_exists(self::class, 'lsRetailApiTriggerEvents') === false || empty(self::$lsRetailApiTriggerEvents)) {
             return;
         }
@@ -43,48 +39,11 @@ trait HasLightspeedRetailResources
                     return;
                 }
 
-                // support event specific columns
-                if (in_array($event, ['created', 'updated'])) {
-                    $mapping = $mapping->get($event, $mapping);
-                }
-
                 if ($model->isDirty($mapping->flatten(2)->toArray()) === false) {
                     return;
                 }
 
-                $payloads = [];
-
-                // convert mapping to Lightspeed Retail paylaod
-                foreach ($mapping as $resource => $resourceMapping) {
-                    foreach ($resourceMapping as $apiColumn => $value) {
-
-                        // map the "dirty" column with the mutated value
-                        if (is_array($value)) {
-                            $value = last($value);
-                        }
-
-                        if (Str::contains($value, '.') === true) {
-                            // mapping for relationship
-                            [$relation, $relationValue] = explode('.', $value, 2);
-
-                            // check that the relation exists and isn't NULL
-                            if (method_exists($model, $relation) === false || $model->$relation === null) {
-                                continue;
-                            }
-
-                            $freshRelation = $model->$relation()->first();
-                            $payloads[$resource]['model'] = $freshRelation;
-                            $payloads[$resource]['resource'] = $resource;
-                            $payloads[$resource]['payload'][$apiColumn] = Str::contains($value, '.id') === true ? $value : $freshRelation->$relationValue;
-
-                        } else {
-                            // default mapping -> the order of these parameters is important
-                            $payloads[$resource]['model'] = $model->withoutRelations();
-                            $payloads[$resource]['resource'] = $resource;
-                            $payloads[$resource]['payload'][$apiColumn] = $model->$value;
-                        }
-                    }
-                }
+                $payloads = (new GenerateRetailPayloadAction())->execute($model);
 
                 if (empty($payloads)) {
                     return;

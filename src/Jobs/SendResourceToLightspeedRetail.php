@@ -15,6 +15,7 @@ use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
+use TimothyDC\LightspeedRetailApi\Exceptions\WaitingForSynchronisationException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
@@ -22,6 +23,16 @@ use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 class SendResourceToLightspeedRetail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /*
+     * Times the job will be retried
+     */
+    public $tries = 5;
+
+    /*
+     * The number of seconds to wait before retrying the job
+     */
+    public $retryAfter = 10;
 
     private Model $model;
     private string $resource;
@@ -39,6 +50,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
      * @throws IncorrectModelConfigurationException
      * @throws AuthenticationException
      * @throws LightspeedRetailException
+     * @throws WaitingForSynchronisationException
      */
     public function handle(SaveLightspeedRetailResourceAction $saveLightspeedRetailResourceAction): void
     {
@@ -101,6 +113,9 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 && config('lightspeed-retail.behavior.allow_archive_on_create') === true);
     }
 
+    /**
+     * @throws WaitingForSynchronisationException
+     */
     private function loadRelationship(): void
     {
         // replace relationships
@@ -108,7 +123,20 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
         foreach ($relations as $lightspeedForeignKey => $localeForeignKey) {
             [$relatedObject] = explode('.id', $localeForeignKey);
-            $this->payload[$lightspeedForeignKey] = optional($this->model->$relatedObject()->first(), fn($model) => $model->lightspeedRetailResource->lightspeed_id);
+
+            // when we unlink a resource
+            if (is_null($this->model->$relatedObject()->first()) === true) {
+                $this->payload[$lightspeedForeignKey] = null;
+                continue;
+            }
+
+            // when we are waiting for a related resource to synchronise
+            if (is_null($this->model->$relatedObject()->first()->lightspeedRetailResource) === true) {
+                throw new WaitingForSynchronisationException('Waiting for ' . $relatedObject . ':' . $this->model->$relatedObject()->first()->id . ' to synchronise.');
+            }
+
+            // when we are golden; add the related resource Lightspeed ID to the payload
+            $this->payload[$lightspeedForeignKey] = $this->model->$relatedObject()->first()->lightspeedRetailResource->lightspeed_id;
         }
     }
 
