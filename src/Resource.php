@@ -55,6 +55,10 @@ class Resource
      */
     public function update(int $id, array $payload): Collection
     {
+        if (empty($payload)) {
+            return collect([$this->primaryKey => $id] + $payload);
+        }
+
         return $this->client->put(static::$resource, $id, $payload);
     }
 

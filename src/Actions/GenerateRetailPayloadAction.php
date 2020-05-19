@@ -22,11 +22,17 @@ class GenerateRetailPayloadAction
         foreach ($mapping as $resource => $resourceMapping) {
             foreach ($resourceMapping as $apiColumn => $attribute) {
 
+                $localAttribute = $attribute;
                 $value = $attribute;
 
                 // map the "dirty" column with the mutated value
                 if (is_array($attribute)) {
+                    $localAttribute = head($attribute);
                     $value = last($attribute);
+                }
+
+                if ($model->isDirty($localAttribute) === false) {
+                    continue;
                 }
 
                 if (Str::contains($value, '.') === true) {
