@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class GenerateRetailPayloadAction
 {
-    public function execute(Model $model): array
+    public function execute(Model $model, bool $forcePayload = false): array
     {
         if (method_exists($model, 'lightspeedRetailResourceMapping') === false || empty($model::lightspeedRetailResourceMapping())) {
             return [];
@@ -31,7 +31,7 @@ class GenerateRetailPayloadAction
                     $value = last($attribute);
                 }
 
-                if ($model->isDirty($localAttribute) === false) {
+                if ($forcePayload === false && $model->isDirty($localAttribute) === false) {
                     continue;
                 }
 
@@ -57,7 +57,7 @@ class GenerateRetailPayloadAction
                     // check that the related resource was synchronised
                     if (Str::contains($value, '.id') === true && $freshRelation && $freshRelation->lightspeedRetailResource()->exists() === false) {
                         // resource was not synchronised, prepare payload
-                        $relationPayloads = array_merge($relationPayloads, $this->execute($freshRelation));
+                        $relationPayloads = array_merge($relationPayloads, $this->execute($freshRelation, true));
                     }
 
                 } else {
