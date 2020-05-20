@@ -49,7 +49,7 @@ trait HasLightspeedRetailResources
                     return;
                 }
 
-                $payloads = collect($payloads);
+                $payloads = collect($payloads)->filter(fn($payload) => count($payload['payload']) > 0);
 
                 // send payload to processor
                 if (config('lightspeed-retail.api.async') === true) {

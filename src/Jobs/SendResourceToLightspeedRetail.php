@@ -68,12 +68,26 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 return;
             }
 
-            if ($this->allowedToCreateArchivedItems() === false) {
-                return;
+            $archiveItem = false;
+            if ($this->allowedToArchiveItems()) {
+                if (config('lightspeed-retail.behavior.allow_archive_on_create') === true) {
+                    $archiveItem = true;
+
+                } else {
+                    return;
+                }
             }
+
+            // archive not allowed on create
+            unset($this->payload[ResourceItem::$archived]);
 
             // create new API resource
             $lsResource = $this->getApiClientobject()->create($this->payload);
+
+            // archive item of need be
+            if ($archiveItem) {
+                $this->getApiClientobject()->delete($lsResource->get($this->getApiClientobject()->primaryKey));
+            }
 
             // save API resource
             $saveLightspeedRetailResourceAction->execute([
@@ -84,6 +98,16 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             ]);
 
         } else {
+
+            if ($this->allowedToArchiveItems()) {
+                $this->getApiClientobject()->delete($this->model->lightspeedRetailResource->lightspeed_id);
+                unset($this->payload[ResourceItem::$archived]);
+
+                if (empty($this->payload)) {
+                    return;
+                }
+            }
+
             // update API resource
             $this->getApiClientobject()->update($this->model->lightspeedRetailResource->lightspeed_id, $this->payload);
         }
@@ -105,12 +129,11 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         return true;
     }
 
-    private function allowedToCreateArchivedItems(): bool
+    private function allowedToArchiveItems(): bool
     {
-        return $this->resource !== ResourceItem::$resource
-            || (array_key_exists(ResourceItem::$archived, $this->payload)
-                && $this->payload[ResourceItem::$archived] === false
-                && config('lightspeed-retail.behavior.allow_archive_on_create') === true);
+        return $this->resource === ResourceItem::$resource
+            && array_key_exists(ResourceItem::$archived, $this->payload)
+            && $this->payload[ResourceItem::$archived] === true;
     }
 
     /**

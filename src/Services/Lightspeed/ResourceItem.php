@@ -25,14 +25,14 @@ class ResourceItem extends Resource
      */
     public function create(array $payload): Collection
     {
-        try {
-            $originalPayload = $payload;
+        $payload = $this->formatPayload($payload);
 
+        try {
             // create new API resource
-            $response = $this->client->post(static::$resource, $this->formatPayload($payload));
+            $response = $this->client->post(static::$resource, $payload);
 
             // instantly archive item if needed
-            if (array_key_exists(self::$archived, $originalPayload) && $originalPayload[self::$archived] === true) {
+            if (array_key_exists(self::$archived, $payload) && $payload[self::$archived] === true) {
                 $this->delete((int)$response->get($this->primaryKey));
             }
 
@@ -40,7 +40,7 @@ class ResourceItem extends Resource
 
         } catch (DuplicateResourceException $e) {
             // request existing API resource
-            return $this->client->get(static::$resource, null, collect($this->formatPayload($payload))
+            return $this->client->get(static::$resource, null, collect($payload)
                 ->only([$this->primaryKey, self::$upc, self::$ean])
                 ->mapWithKeys(fn($param) => ['itemCode' => ['operator' => '=', 'value' => $param['value']]])
                 ->toArray())
@@ -55,28 +55,7 @@ class ResourceItem extends Resource
 
     protected function formatPayload(array $payload, int $id = null): array
     {
-        $payload = $this->filterOutArchive($id, $payload);
         $payload = $this->adjustPricePayload($payload);
-        return $payload;
-    }
-
-    private function filterOutArchive(?int $id, array $payload): array
-    {
-        // no "archived" == no problem
-        if (array_key_exists(self::$archived, $payload) === false) {
-            return $payload;
-        }
-
-        // no "id" means we are doing a POST request, which can't handle the "archived" parameter
-        if (is_null($id)) {
-            unset($payload[self::$archived]);
-            return $payload;
-
-        } elseif ($payload[self::$archived] === true) {
-            unset($payload[self::$archived]);
-            $this->delete($id);
-        }
-
         return $payload;
     }
 
