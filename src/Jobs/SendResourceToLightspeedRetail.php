@@ -86,7 +86,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
             // archive item of need be
             if ($archiveItem) {
-                $this->getApiClientobject()->delete($lsResource->get($this->getApiClientobject()->primaryKey));
+                $this->getApiClientobject()->delete((int)$lsResource->get($this->getApiClientobject()->primaryKey));
             }
 
             // save API resource
