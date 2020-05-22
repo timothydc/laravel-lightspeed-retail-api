@@ -25,6 +25,16 @@ class LightspeedRetailResource extends Model
         return $this->morphTo();
     }
 
+    public static function findByRelation(string $resource, int $resourceId): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = self::query();
+
+        $query->where('lightspeed_type', $resource);
+        $query->where('lightspeed_id', $resourceId);
+
+        return $query;
+    }
+
     public function getRetailLink(): string
     {
         return strtolower(sprintf('https://us.merchantos.com/?name=%s.views.%s&form_name=view&id=%d', $this->lightspeed_type, $this->lightspeed_type, $this->lightspeed_id));
