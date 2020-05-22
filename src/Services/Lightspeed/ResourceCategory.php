@@ -9,4 +9,8 @@ class ResourceCategory extends Resource
 {
     public static string $resource = 'Category';
     public string $primaryKey = 'categoryID';
+
+    public static string $name = 'name';
+    public static string $parentId = 'parentID';
+    public static string $fullPathName = 'fullPathName';
 }
