@@ -71,7 +71,7 @@ class ApiClient
         }
 
         // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
-        if ($response['@attributes']['count'] ?? false && $response['@attributes']['count'] === 1) {
+        if (isset($response['@attributes']['count']) && $response['@attributes']['count'] === 1) {
             $response[$resource] = [$response[$resource]];
         }
 

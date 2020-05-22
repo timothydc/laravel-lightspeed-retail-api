@@ -26,10 +26,6 @@ class Resource
 
     public function get(int $id = null, array $query = []): Collection
     {
-        if ($id) {
-            return $this->client->get(static::$resource, $id, $query);
-        }
-
         return $this->client->get(static::$resource, $id, $query);
     }
 
