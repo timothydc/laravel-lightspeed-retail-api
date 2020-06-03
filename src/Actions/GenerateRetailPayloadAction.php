@@ -31,7 +31,7 @@ class GenerateRetailPayloadAction
                     $value = last($attribute);
                 }
 
-                if ($forcePayload === false && $model->isDirty($localAttribute) === false) {
+                if (!in_array($localAttribute, $model->lsForceSyncFields ?? []) && $forcePayload === false && $model->isDirty($localAttribute) === false) {
                     continue;
                 }
 
