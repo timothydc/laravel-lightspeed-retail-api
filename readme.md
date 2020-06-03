@@ -184,6 +184,19 @@ class Product extends \Illuminate\Database\Eloquent\Model
 
 ```
 
+If you would like to send fields to Lightspeed, even when the value isn't changed. You can add them to the $lsForceSyncFields array.
+
+```php
+use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
+
+class Product extends \Illuminate\Database\Eloquent\Model
+{
+    use HasLightspeedRetailResources;
+
+    public static array $lsForceSyncFields = ['ean'];
+}
+```
+
 ## Change log
 
 Please see the [changelog](changelog.md) for more information on what has changed recently.
