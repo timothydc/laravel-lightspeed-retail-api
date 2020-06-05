@@ -13,7 +13,7 @@ trait HasLightspeedRetailResources
 {
     // public static function lightspeedRetailResourceMapping() { return ['API resource column (case sensitive)' => 'Your model column']; }
     // public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
-    // public static array $lsForceSyncFields = ['ean'];
+    // public array $lsForceSyncFields = ['ean'];
 
     public static function bootHasLightspeedRetailResources(): void
     {

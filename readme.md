@@ -193,7 +193,7 @@ class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
-    public static array $lsForceSyncFields = ['ean'];
+    public array $lsForceSyncFields = ['ean'];
 }
 ```
 
