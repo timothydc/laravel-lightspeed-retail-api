@@ -5,8 +5,9 @@ namespace TimothyDC\LightspeedRetailApi\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Facades\App;
+use TimothyDC\LightspeedRetailApi\Actions\DispatchLightspeedRetailResourceAction;
 use TimothyDC\LightspeedRetailApi\Actions\GenerateRetailPayloadAction;
-use TimothyDC\LightspeedRetailApi\Jobs\SendResourceToLightspeedRetail;
 use TimothyDC\LightspeedRetailApi\Models\LightspeedRetailResource;
 
 trait HasLightspeedRetailResources
@@ -15,8 +16,14 @@ trait HasLightspeedRetailResources
     // public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
     // public array $lsForceSyncFields = ['ean'];
 
+    public static GenerateRetailPayloadAction $lsRetailPayloadAction;
+    public static DispatchLightspeedRetailResourceAction $lsRetailDispatchAction;
+
     public static function bootHasLightspeedRetailResources(): void
     {
+        static::$lsRetailPayloadAction = App::make(GenerateRetailPayloadAction::class);
+        static::$lsRetailDispatchAction = App::make(DispatchLightspeedRetailResourceAction::class);
+
         static::listenToResourceEvents();
     }
 
@@ -34,7 +41,14 @@ trait HasLightspeedRetailResources
                 continue;
             }
 
-            static::$event(function (Model $model) use ($event, $mapping) {
+            if (in_array($event, static::$lsRetailApiTriggerEvents, true) === false) {
+                continue;
+            }
+
+            $payloadAcion = static::$lsRetailPayloadAction;
+            $dispatchAction = static::$lsRetailDispatchAction;
+
+            static::$event(static function (Model $model) use ($event, $mapping, $payloadAcion, $dispatchAction) {
                 if ($event === 'deleted') {
                     // TODO remove resource from LS retail
                     return;
@@ -44,21 +58,7 @@ trait HasLightspeedRetailResources
                     return;
                 }
 
-                $payloads = (new GenerateRetailPayloadAction())->execute($model);
-
-                if (empty($payloads)) {
-                    return;
-                }
-
-                $payloads = collect($payloads)->filter(fn($payload) => count($payload['payload']) > 0);
-
-                // send payload to processor
-                if (config('lightspeed-retail.api.async') === true) {
-                    SendResourceToLightspeedRetail::dispatch(...array_values($payloads->shift()))->chain($payloads->map(fn($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray());
-
-                } else {
-                    $payloads->each(fn($payload) => SendResourceToLightspeedRetail::dispatchNow(...array_values($payload)));
-                }
+                $dispatchAction->execute($payloadAcion->execute($model));
             });
         }
     }
