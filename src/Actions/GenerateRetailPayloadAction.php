@@ -10,11 +10,11 @@ class GenerateRetailPayloadAction
 {
     public function execute(Model $model, bool $forcePayload = false): array
     {
-        if (method_exists($model, 'lightspeedRetailResourceMapping') === false || empty($model::lightspeedRetailResourceMapping())) {
+        if (method_exists($model, 'getLightspeedRetailResourceMapping') === false || empty($model::getLightspeedRetailResourceMapping())) {
             return [];
         }
 
-        $mapping = $model::lightspeedRetailResourceMapping();
+        $mapping = $model::getLightspeedRetailResourceMapping();
 
         $relationPayloads = [];
         $payloads = [];

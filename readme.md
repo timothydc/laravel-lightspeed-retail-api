@@ -121,14 +121,27 @@ $categories = LightspeedRetailApi::api()->category()->get(20);
 $categories = LightspeedRetailApi::api()->category()->first(20);
 ```
 
-### Automatic model synchronisation
-If you would like to automatically synchronise your data to Lightspeed,
-you can add the `HasLightspeedRetailResources` trait to your model. 
+Note that not all [resources][ls-added-resources] are added (yet). Feel free to add them yourself via a pull request!
 
-In `lightspeedRetailResourceMapping()` you want to map your model fields to the Lightspeed resource.
+---
+
+### Automatic model synchronisation [optional]
+If you would like to automatically synchronise your data to Lightspeed,
+you can add the `HasLightspeedRetailResources` trait and the `AutomaticSynchronisationInterface` interface to your model
+
+In `getLightspeedRetailResourceMapping()` you want to map your model fields to the Lightspeed resource.
 The order of the resources is the order of the synchronisation.
 In the example below we put the manufacturer resource before the product resource
 because we need the `manufacturer id` for when we are syncing the product.
+
+In `getLightspeedRetailResourceName()` you need to define the Lightspeed resource that represents your model. For example:
+```php
+    public function getLightspeedRetailResourceName(): string
+    {
+        return \TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem::$resource;
+    }
+```
+
 
 Don't forget to add the `HasLightspeedRetailResources` trait to your `manufacturer` resource too.
 ```php
@@ -139,7 +152,7 @@ class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
-    public static function lightspeedRetailResourceMapping(): array
+    public static function getLightspeedRetailResourceMapping(): array
     {
         return [
             ResourceVendor::$resource => [
@@ -179,12 +192,15 @@ class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
-    public static array $lsRetailApiTriggerEvents = ['created', 'updated', 'deleted'];
+        public static function getLightspeedRetailApiTriggerEvents(): array
+        {
+            return ['created', 'updated', 'deleted'];
+        }
 }
 
 ```
 
-If you would like to send fields to Lightspeed, even when the value isn't changed. You can add them to the $lsForceSyncFields array.
+If you would like to send fields to Lightspeed, even when the value isn't changed. You can add them to the `$lsForceSyncFields` array.
 
 ```php
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
@@ -224,6 +240,7 @@ MIT. Please see the [license file](license.md) for more information.
 [ls-docs-mutators]: https://laravel.com/docs/eloquent-mutators#defining-an-accessor
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
+[ls-added-resources]: https://github.com/timothydc/laravel-lightspeed-retail-api/tree/master/src/Services/Lightspeed
 [laravel-docs-collections]: https://laravel.com/docs/7.x/collections
 [ico-version]: https://img.shields.io/packagist/v/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
