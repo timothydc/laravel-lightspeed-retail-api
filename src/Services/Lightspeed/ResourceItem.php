@@ -40,11 +40,12 @@ class ResourceItem extends Resource
 
         } catch (DuplicateResourceException $e) {
             // request existing API resource
-            return $this->client->get(static::$resource, null, collect($payload)
-                ->only([$this->primaryKey, self::$upc, self::$ean])
-                ->mapWithKeys(fn($param) => ['itemCode' => ['operator' => '=', 'value' => $param['value']]])
-                ->toArray())
-                ->first();
+            return $this->client->get(static::$resource, null,
+                collect($payload)
+                    ->only([$this->primaryKey, self::$upc, self::$ean])
+                    ->mapWithKeys(fn($param) => ['itemCode' => ['operator' => '=', 'value' => $param]])
+                    ->toArray()
+            );
         }
     }
 

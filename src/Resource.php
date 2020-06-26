@@ -40,9 +40,11 @@ class Resource
 
         } catch (DuplicateResourceException $e) {
             // request existing API resource
-            return $this->client->get(static::$resource, null, collect($payload)
-                ->map(fn($param) => ['value' => $param])
-                ->toArray())->first();
+            return $this->client->get(static::$resource, null,
+                collect($payload)
+                    ->map(fn($param) => ['value' => $param])
+                    ->toArray()
+            );
         }
     }
 
