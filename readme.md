@@ -136,10 +136,10 @@ because we need the `manufacturer id` for when we are syncing the product.
 
 In `getLightspeedRetailResourceName()` you need to define the Lightspeed resource that represents your model. For example:
 ```php
-    public function getLightspeedRetailResourceName(): string
-    {
-        return \TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem::$resource;
-    }
+public function getLightspeedRetailResourceName(): string
+{
+    return \TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem::$resource;
+}
 ```
 
 
@@ -192,10 +192,10 @@ class Product extends \Illuminate\Database\Eloquent\Model
 {
     use HasLightspeedRetailResources;
 
-        public static function getLightspeedRetailApiTriggerEvents(): array
-        {
-            return ['created', 'updated', 'deleted'];
-        }
+    public static function getLightspeedRetailApiTriggerEvents(): array
+    {
+        return ['created', 'updated', 'deleted'];
+    }
 }
 
 ```
