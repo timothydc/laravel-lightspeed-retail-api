@@ -14,7 +14,7 @@ class VerifyApiConnectionCommand extends Command
     public function handle(): int
     {
         $this->info(json_encode(LightspeedRetailApi::api()->category()->first(8)));
-        LightspeedRetailApi::api()->put('Category', 7, ['name' => 'Electronics v3']);
+
         return 0;
     }
 }
