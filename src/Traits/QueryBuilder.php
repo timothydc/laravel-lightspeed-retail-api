@@ -43,7 +43,7 @@ trait QueryBuilder
     private function buildQueryParameters(array $parameters = []): string
     {
         $queryParameters = [];
-dump($parameters);
+
         foreach ($parameters as $column => $query) {
 
             if ($column === 'load_relations' && is_array($query)) {
