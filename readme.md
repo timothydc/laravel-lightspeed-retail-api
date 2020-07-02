@@ -71,9 +71,6 @@ $ php artisan retail:auth
 The command will ask you about the scope, and you will get an URL in return. Excellent deal!
 
 #### Via controller
-
-
-
 ```php
 use TimothyDC\LightspeedRetailApi\Scope;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
@@ -114,6 +111,9 @@ use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 // get all
 $account = LightspeedRetailApi::api()->account()->get();
 
+// filter with GET (with a limit and custom sorting
+$categories = LightspeedRetailApi::api()->category()->get(null, ['limit' => 10, 'orderby' => 'name']);
+
 // get category with ID 20
 $categories = LightspeedRetailApi::api()->category()->get(20);
 
@@ -122,6 +122,19 @@ $categories = LightspeedRetailApi::api()->category()->first(20);
 ```
 
 Note that not all [resources][ls-added-resources] are added (yet). Feel free to add them yourself via a pull request!
+If you would like to filter the `GET`-results you can [look at the query parameters API][ls-query-parameters]
+
+```php
+
+// advanced filtering
+
+// get categories with an ID > 10
+$categories = LightspeedRetailApi::api()->category()->get(null, ['categoryID' => ['operator' => '>', 'value' => 10]]);
+
+// get categories with their parent relation
+$categories = LightspeedRetailApi::api()->category()->get(null, ['load_relations' => ['Parent']]);
+
+```
 
 ---
 
@@ -235,6 +248,7 @@ If you discover any security related issues, please email mail@timothydc.be inst
 
 MIT. Please see the [license file](license.md) for more information.
 
+[ls-query-parameters] https://developers.lightspeedhq.com/retail/introduction/parameters/
 [ls-docs]: https://developers.lightspeedhq.com/retail/introduction/introduction/
 [ls-docs-scopes]: https://developers.lightspeedhq.com/retail/authentication/scopes
 [ls-docs-mutators]: https://laravel.com/docs/eloquent-mutators#defining-an-accessor

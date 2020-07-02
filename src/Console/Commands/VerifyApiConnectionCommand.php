@@ -15,6 +15,8 @@ class VerifyApiConnectionCommand extends Command
     {
         $this->info(json_encode(LightspeedRetailApi::api()->category()->first(8)));
 
+//      dump(LightspeedRetailApi::api()->category()->get(null, ['categoryID' => ['operator' => '>', 'value' => 10]]));
+        dump(LightspeedRetailApi::api()->category()->get(null, ['load_relations' => ['Parent']]));
         return 0;
     }
 }

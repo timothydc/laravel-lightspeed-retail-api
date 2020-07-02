@@ -43,7 +43,7 @@ trait QueryBuilder
     private function buildQueryParameters(array $parameters = []): string
     {
         $queryParameters = [];
-
+dump($parameters);
         foreach ($parameters as $column => $query) {
 
             if ($column === 'load_relations' && is_array($query)) {
@@ -56,6 +56,11 @@ trait QueryBuilder
                 continue;
             }
 
+            if (!is_array($query)) {
+                $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . urlencode((string)$query);
+                continue;
+            }
+
             if (!array_key_exists('operator', $query)) {
                 $query['operator'] = $this->operator_equal;
             }
@@ -64,7 +69,7 @@ trait QueryBuilder
                 $query['value'] = '';
             }
 
-            $queryParameters[] = $column . $this->_getOperator($query['operator']) . urlencode($query['value']);
+            $queryParameters[] = $column . $this->_getOperator($query['operator']) . urlencode((string)$query['value']);
         }
 
         return implode('&', $queryParameters);
