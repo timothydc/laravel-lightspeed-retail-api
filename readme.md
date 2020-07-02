@@ -248,7 +248,7 @@ If you discover any security related issues, please email mail@timothydc.be inst
 
 MIT. Please see the [license file](license.md) for more information.
 
-[ls-query-parameters] https://developers.lightspeedhq.com/retail/introduction/parameters/
+[ls-query-parameters]: https://developers.lightspeedhq.com/retail/introduction/parameters/
 [ls-docs]: https://developers.lightspeedhq.com/retail/introduction/introduction/
 [ls-docs-scopes]: https://developers.lightspeedhq.com/retail/authentication/scopes
 [ls-docs-mutators]: https://laravel.com/docs/eloquent-mutators#defining-an-accessor
