@@ -19,6 +19,14 @@ class ResourceItem extends Resource
     public static string $vendorId = 'defaultVendorID';
     public static string $upc = 'upc';
     public static string $archived = 'archived';
+    public static string $categoryId = 'categoryID';
+    public static string $taxId = 'taxClassID';
+    public static string $manufacturerSku = 'manufacturerSku';
+    public static string $customSku = 'customSku';
+    public static string $modelYear = 'modelYear';
+    public static string $tax = 'tax';
+    public static string $defaultCost = 'defaultCost';
+    public static string $note = 'note';
 
     /**
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
