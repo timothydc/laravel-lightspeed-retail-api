@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Actions\SaveLightspeedRetailResourceAction;
+use TimothyDC\LightspeedRetailApi\Events\ResourceSendEvent;
 use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
@@ -111,6 +112,8 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             // update API resource
             $this->getApiClientobject()->update($this->model->lightspeedRetailResource->lightspeed_id, $this->payload);
         }
+
+        event(new ResourceSendEvent($this->model->lightspeedRetailResource));
     }
 
     private function getApiClientobject(): \TimothyDC\LightspeedRetailApi\Resource
