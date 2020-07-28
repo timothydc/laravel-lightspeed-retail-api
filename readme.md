@@ -2,8 +2,6 @@
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Total Downloads][ico-downloads]][link-downloads]
-[![Build Status][ico-travis]][link-travis]
-[![StyleCI][ico-styleci]][link-styleci]
 
 ## Installation
 
@@ -263,8 +261,6 @@ MIT. Please see the [license file](license.md) for more information.
 
 [link-packagist]: https://packagist.org/packages/timothydc/laravel-lightspeed-retail-api
 [link-downloads]: https://packagist.org/packages/timothydc/laravel-lightspeed-retail-api
-[link-travis]: https://travis-ci.org/timothydc/laravel-lightspeed-retail-api
-[link-styleci]: https://styleci.io/repos/12345678
 [link-author]: https://github.com/timothydc
 [link-contributors]: ../../contributors
 [link-james-ratcliffe]: https://github.com/jamesratcliffe
