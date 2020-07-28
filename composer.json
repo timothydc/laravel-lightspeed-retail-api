@@ -14,11 +14,18 @@
         "php": "^7.4"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.16"
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "orchestra/testbench": "^5.0",
+        "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "psr-4": {
             "TimothyDC\\LightspeedRetailApi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "TimothyDC\\LightspeedRetailApi\\Tests\\": "tests"
         }
     },
     "extra": {
