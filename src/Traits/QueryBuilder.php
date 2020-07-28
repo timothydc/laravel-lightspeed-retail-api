@@ -37,6 +37,7 @@ trait QueryBuilder
     private function buildQueryString(array $parameters = []) : string
     {
         $parameters = $this->buildQueryParameters($parameters);
+
         return $parameters ? '?' . $parameters : '';
     }
 
@@ -45,27 +46,29 @@ trait QueryBuilder
         $queryParameters = [];
 
         foreach ($parameters as $column => $query) {
-
             if ($column === 'load_relations' && is_array($query)) {
                 $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . sprintf('["%s"]', implode(',', $query));
+
                 continue;
             }
 
-            if (is_array($query) && !array_key_exists('operator', $query)) {
+            if (is_array($query) && ! array_key_exists('operator', $query)) {
                 $queryParameters[] = $column . $this->_getOperator($this->operator_in) . sprintf('["%s"]', implode(',', $query));
+
                 continue;
             }
 
-            if (!is_array($query)) {
+            if (! is_array($query)) {
                 $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . urlencode((string)$query);
+
                 continue;
             }
 
-            if (!array_key_exists('operator', $query)) {
+            if (! array_key_exists('operator', $query)) {
                 $query['operator'] = $this->operator_equal;
             }
 
-            if (!array_key_exists('value', $query)) {
+            if (! array_key_exists('value', $query)) {
                 $query['value'] = '';
             }
 
@@ -78,7 +81,6 @@ trait QueryBuilder
     private function _getOperator($operator): string
     {
         if (array_key_exists($operator, $this->operatorMapping())) {
-
             $parsedOperator = $this->operatorMapping()[$operator];
 
             if ($operator != $this->operator_equal) {

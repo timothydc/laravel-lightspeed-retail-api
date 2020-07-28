@@ -21,7 +21,6 @@ class GenerateRetailPayloadAction
 
         foreach ($mapping as $resource => $resourceMapping) {
             foreach ($resourceMapping as $apiColumn => $attribute) {
-
                 $localAttribute = $attribute;
                 $value = $attribute;
 
@@ -31,7 +30,7 @@ class GenerateRetailPayloadAction
                     $value = last($attribute);
                 }
 
-                if ($forcePayload === false && !in_array($localAttribute, $model->lsForceSyncFields ?? [], true) && $model->isDirty($localAttribute) === false) {
+                if ($forcePayload === false && ! in_array($localAttribute, $model->lsForceSyncFields ?? [], true) && $model->isDirty($localAttribute) === false) {
                     continue;
                 }
 
@@ -49,7 +48,6 @@ class GenerateRetailPayloadAction
 
                     if (Str::contains($value, '.id') === true || is_null($freshRelation) === true) {
                         $resourceColumnValue = $value;
-
                     } else {
                         $resourceColumnValue = $freshRelation->$relationValue;
                     }
@@ -59,7 +57,6 @@ class GenerateRetailPayloadAction
                         // resource was not synchronised, prepare payload
                         $relationPayloads = array_merge($relationPayloads, $this->execute($freshRelation, true));
                     }
-
                 } else {
                     $resourceColumnValue = $model->$value;
                 }

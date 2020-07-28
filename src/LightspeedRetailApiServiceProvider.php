@@ -4,7 +4,8 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi;
 
 use Illuminate\Support\ServiceProvider;
-use TimothyDC\LightspeedRetailApi\Console\Commands\{GenerateAuthenticationUrlCommand, VerifyApiConnectionCommand};
+use TimothyDC\LightspeedRetailApi\Console\Commands\GenerateAuthenticationUrlCommand;
+use TimothyDC\LightspeedRetailApi\Console\Commands\VerifyApiConnectionCommand;
 use TimothyDC\LightspeedRetailApi\Services\ApiClient;
 
 class LightspeedRetailApiServiceProvider extends ServiceProvider
@@ -21,7 +22,7 @@ class LightspeedRetailApiServiceProvider extends ServiceProvider
         ], ['lightspeed-api', 'lightspeed-api:config']);
 
         $this->publishes([
-            __DIR__ . '/../database/migrations/' => database_path('migrations')
+            __DIR__ . '/../database/migrations/' => database_path('migrations'),
         ], ['lightspeed-api', 'lightspeed-api:migrations']);
     }
 

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Services\Lightspeed;
 
-use Illuminate\Support\Collection;
 use TimothyDC\LightspeedRetailApi\Resource;
 
 class ResourceVendor extends Resource

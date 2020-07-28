@@ -37,7 +37,6 @@ trait HasLightspeedRetailResources
         $mapping = collect(self::getLightspeedRetailResourceMapping());
 
         foreach (self::getLightspeedRetailApiTriggerEvents() as $event) {
-
             if (method_exists(self::class, $event) === false) {
                 continue;
             }
@@ -56,6 +55,7 @@ trait HasLightspeedRetailResources
                     if ($model->lightspeedRetailResource()->exists() && $model->lightspeedRetailResource->lightspeed_id) {
                         $removeAction->execute($model, $model->getLightspeedRetailResourceName(), $model->lightspeedRetailResource->lightspeed_id);
                     }
+
                     return;
                 }
 

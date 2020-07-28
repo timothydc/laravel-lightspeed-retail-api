@@ -55,7 +55,7 @@ class TokenRepository implements TokenInterface
         if ($this->table->getAttribute($this->keyIdentifier) === null) {
             $token = (new $this->table())->where($this->keyIdentifier, $this->tokenIdentifier)->first();
 
-            if (!$token) {
+            if (! $token) {
                 $token = $this->createToken();
             }
 

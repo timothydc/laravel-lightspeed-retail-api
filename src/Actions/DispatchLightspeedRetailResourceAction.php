@@ -13,14 +13,13 @@ class DispatchLightspeedRetailResourceAction
             return;
         }
 
-        $filteredPayloads = collect($payloads)->filter(fn($payload) => count($payload['payload']) > 0);
+        $filteredPayloads = collect($payloads)->filter(fn ($payload) => count($payload['payload']) > 0);
 
         // send payload to processor
         if (config('lightspeed-retail.api.async') === true) {
-            SendResourceToLightspeedRetail::dispatch(...array_values($filteredPayloads->shift()))->chain($filteredPayloads->map(fn($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray());
-
+            SendResourceToLightspeedRetail::dispatch(...array_values($filteredPayloads->shift()))->chain($filteredPayloads->map(fn ($payload) => new SendResourceToLightspeedRetail(...array_values($payload)))->toArray());
         } else {
-            $filteredPayloads->each(fn($payload) => SendResourceToLightspeedRetail::dispatchNow(...array_values($payload)));
+            $filteredPayloads->each(fn ($payload) => SendResourceToLightspeedRetail::dispatchNow(...array_values($payload)));
         }
     }
 }

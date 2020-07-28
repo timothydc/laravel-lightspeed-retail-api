@@ -66,7 +66,7 @@ class ApiClient
         $response = $responseObject->json();
 
         // unstructured way of requesting the "Account" resource
-        if (!$resource) {
+        if (! $resource) {
             return collect($response['Account']);
         }
 
@@ -99,6 +99,7 @@ class ApiClient
             }
 
             Log::error($response['message'], ['method' => 'put', 'url' => $this->getUrl($resource), 'payload' => $payload]);
+
             throw new LightspeedRetailException($response['message'], $responseObject->status());
         }
 
@@ -119,6 +120,7 @@ class ApiClient
         $response = $responseObject->json();
         if ($responseObject->clientError() || $responseObject->serverError()) {
             Log::error($response['message'], ['method' => 'put', 'url' => $this->getUrl($resource, $id), 'payload' => $payload]);
+
             throw new LightspeedRetailException($response['message'], $responseObject->status());
         }
 
@@ -147,7 +149,7 @@ class ApiClient
 
     private function getUrl(string $resource = null, int $id = null): string
     {
-        if (!$resource) {
+        if (! $resource) {
             return $this->baseUrl;
         }
 
@@ -209,9 +211,11 @@ class ApiClient
         switch ($grantType) {
             case self::GRANT_TYPE_AUTHORIZATION_CODE:
                 $postFields += ['code' => $code];
+
                 break;
             case self::GRANT_TYPE_REFRESH_TOKEN:
                 $postFields += ['refresh_token' => $code];
+
                 break;
         }
 
@@ -385,7 +389,7 @@ class ApiClient
                     'level' => $bucket[0],
                     'size' => $bucket[1],
                     'available' => $bucket[1] - $bucket[0],
-                    'drip' => $bucket[1] / 60
+                    'drip' => $bucket[1] / 60,
                 ];
             }
 

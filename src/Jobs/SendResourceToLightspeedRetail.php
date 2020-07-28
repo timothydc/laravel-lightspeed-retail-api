@@ -73,7 +73,6 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             if ($this->allowedToArchiveItems()) {
                 if (config('lightspeed-retail.behavior.allow_archive_on_create') === true) {
                     $archiveItem = true;
-
                 } else {
                     return;
                 }
@@ -97,9 +96,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
                 'lightspeed_type' => $this->resource,
                 'lightspeed_id' => $lsResource->get($this->getApiClientobject()->primaryKey),
             ]);
-
         } else {
-
             if ($this->allowedToArchiveItems()) {
                 $this->getApiClientobject()->delete($this->model->lightspeedRetailResource->lightspeed_id);
                 unset($this->payload[ResourceItem::$archived]);
@@ -123,7 +120,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
     private function validatePayloadForCreateRequest(): bool
     {
-        $this->payload = collect($this->payload)->filter(fn($data) => $data !== null)->toArray();
+        $this->payload = collect($this->payload)->filter(fn ($data) => $data !== null)->toArray();
 
         if (empty($this->payload)) {
             return false;
@@ -145,7 +142,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
     private function loadRelationship(): void
     {
         // replace relationships
-        $relations = collect($this->payload)->filter(fn($item) => Str::contains($item, '.id'));
+        $relations = collect($this->payload)->filter(fn ($item) => Str::contains($item, '.id'));
 
         foreach ($relations as $lightspeedForeignKey => $localeForeignKey) {
             [$relatedObject] = explode('.id', $localeForeignKey);
@@ -153,6 +150,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             // when we unlink a resource
             if (is_null($this->model->$relatedObject()->first()) === true) {
                 $this->payload[$lightspeedForeignKey] = null;
+
                 continue;
             }
 

@@ -3,7 +3,12 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Traits;
 
-use TimothyDC\LightspeedRetailApi\Services\Lightspeed\{ResourceAccount, ResourceCategory, ResourceCustomer, ResourceItem, ResourceManufacturer, ResourceVendor};
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceAccount;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceCategory;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceCustomer;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceManufacturer;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceVendor;
 
 trait RetailResources
 {

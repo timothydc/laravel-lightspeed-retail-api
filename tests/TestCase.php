@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Tests;
 
-use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
 use TimothyDC\LightspeedRetailApi\LightspeedRetailApiServiceProvider;
 

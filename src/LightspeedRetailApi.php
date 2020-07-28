@@ -30,7 +30,7 @@ class LightspeedRetailApi
             'response_type' => 'code',
             'scope' => $scope,
             'client_id' => config('lightspeed-retail.api.key'),
-            'state' => $state
+            'state' => $state,
         ]);
 
         return 'https://cloud.merchantos.com/oauth/authorize.php' . '?' . $query;

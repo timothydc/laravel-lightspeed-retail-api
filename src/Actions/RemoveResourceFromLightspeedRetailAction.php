@@ -13,7 +13,6 @@ class RemoveResourceFromLightspeedRetailAction
         // send to processor
         if (config('lightspeed-retail.api.async') === true) {
             RemoveResourceFromLightspeedRetail::dispatch($model, $resource, $lightspeedId);
-
         } else {
             RemoveResourceFromLightspeedRetail::dispatchNow($model, $resource, $lightspeedId);
         }

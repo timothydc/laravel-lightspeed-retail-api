@@ -10,6 +10,6 @@ class ApiToken extends Model
     protected $table = 'api_tokens';
 
     protected $casts = [
-        'expires_at' => 'datetime'
+        'expires_at' => 'datetime',
     ];
 }
