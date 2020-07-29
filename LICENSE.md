@@ -1,6 +1,6 @@
-# The license
+# MIT License
 
-Copyright (c) Timothy De Cort <mail@timothydc.be>
+Copyright (c) 2020 Timothy De Cort
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
