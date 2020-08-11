@@ -26,8 +26,9 @@ class ApiClient
 {
     use RetailResources, QueryBuilder;
 
-    const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
-    const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
+    public const API_RESULT_LIMIT = 100;
+    public const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
+    public const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
 
     private string $baseUrl = 'https://api.merchantos.com/API/Account/';
 
@@ -53,6 +54,33 @@ class ApiClient
     public function isConfigured(): bool
     {
         return $this->tokenRepository->exists();
+    }
+
+    public function getAll(string $resource = null, int $id = null, array $query = []): Collection
+    {
+        if (! array_key_exists('offset', $query)) {
+            $query['offset'] = 0;
+        }
+
+        if (! array_key_exists('limit', $query)) {
+            $query['limit'] = self::API_RESULT_LIMIT;
+        }
+
+        $results = [];
+
+        while (($result = $this->get($resource, $id, $query))->count() > 0) {
+            $result = Collection::unwrap($result);
+
+            if ($query['limit'] === 1) {
+                $result = [$result];
+            }
+
+            $results = array_merge($result, $results);
+
+            $query['offset'] += $query['limit'];
+        }
+
+        return collect($results);
     }
 
     public function get(string $resource = null, int $id = null, array $query = []): Collection
@@ -140,7 +168,7 @@ class ApiClient
         return collect($response);
     }
 
-    private function logAction(string $method, array $data)
+    private function logAction(string $method, array $data): void
     {
         if (config('lightspeed-retail.api.logging')) {
             Log::debug('Lightspeed Retail: ' . $method, $data);
@@ -160,7 +188,7 @@ class ApiClient
      * @param string $code
      * @throws AuthenticationException
      */
-    public function startUpClient(string $code)
+    public function startUpClient(string $code): void
     {
         // trade temp code for access and refresh code
         $this->storeInitialAccessToken($code);
@@ -253,7 +281,7 @@ class ApiClient
      *
      * @return callable
      */
-    protected function retryDecider()
+    protected function retryDecider(): callable
     {
         return function (
             $retries,
@@ -283,13 +311,13 @@ class ApiClient
                 }
 
                 // 401: Refresh access token and try again once
-                if ($code == 401 && $retries <= 1) {
+                if ($code === 401 && $retries <= 1) {
                     $refresh = true;
                     $should_retry = true;
                 }
 
                 // 429, 502, 503, 504: try again
-                if (in_array($code, [429, 502, 503, 504])) {
+                if (in_array($code, [429, 502, 503, 504], true)) {
                     $should_retry = true;
                 }
             }
@@ -303,10 +331,8 @@ class ApiClient
                 $this->refreshToken();
             }
 
-            if ($should_retry) {
-                if ($retries > 0) {
-                    Log::debug(self::class . ' Retry ' . $retries . '…');
-                }
+            if ($should_retry && $retries > 0) {
+                Log::debug(self::class . ' Retry ' . $retries . '…');
             }
 
             return $should_retry;
@@ -322,9 +348,9 @@ class ApiClient
      *
      * @return callable
      */
-    protected function retryDelay()
+    protected function retryDelay(): callable
     {
-        return function ($numberOfRetries, ResponseInterface $response = null) {
+        return static function ($numberOfRetries, ResponseInterface $response = null) {
             // No delay for 401 or 429 responses
             if ($response) {
                 $code = $response->getStatusCode();
@@ -348,10 +374,10 @@ class ApiClient
      *
      * @return callable
      */
-    protected function checkBucket()
+    protected function checkBucket(): callable
     {
         return function (RequestInterface $request) {
-            $cost = strtolower($request->getMethod()) == 'get' ? 1 : 10;
+            $cost = strtolower($request->getMethod()) === 'get' ? 1 : 10;
             $overflow = $cost - $this->bucket['available'];
 
             if ($overflow > 0) {
@@ -378,7 +404,7 @@ class ApiClient
      *
      * @return callable
      */
-    protected function getBucket()
+    protected function getBucket(): callable
     {
         return function (ResponseInterface $response) {
             $bucket_header = $response->getHeader('X-LS-API-Bucket-Level');
@@ -399,7 +425,7 @@ class ApiClient
         };
     }
 
-    protected function refreshToken()
+    protected function refreshToken(): void
     {
         $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken());
         $response = $responseObject->json();
