@@ -11,7 +11,9 @@
     "homepage": "https://github.com/timothydc/laravel-lightspeed-retail-api",
     "keywords": ["timothydc", "lightspeed", "retail", "laravel"],
     "require": {
-        "php": "^7.4"
+        "php": "^7.4",
+        "guzzlehttp/guzzle": "^7.0",
+        "ext-json": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.16",
