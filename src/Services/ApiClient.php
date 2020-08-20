@@ -387,7 +387,7 @@ class ApiClient
                 if ($sleep_time > $time_since_last) {
                     $sleep_microseconds = ceil($sleep_time * 1000000);
                     Log::debug(self::class . ' Notice: Rate limit reached, sleeping ' . $sleep_microseconds / 1000000 . ' seconds.');
-                    usleep($sleep_microseconds);
+                    usleep((int)$sleep_microseconds);
                 }
             }
 
