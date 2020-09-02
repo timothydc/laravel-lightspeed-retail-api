@@ -18,6 +18,7 @@ use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
 use TimothyDC\LightspeedRetailApi\Exceptions\WaitingForSynchronisationException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
+use TimothyDC\LightspeedRetailApi\Jobs\Middleware\RateLimited;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
@@ -193,5 +194,10 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         }
 
         return true;
+    }
+
+    public function middleware(): array
+    {
+        return [new RateLimited('ls-retail-api', 3, 1, 100)];
     }
 }
