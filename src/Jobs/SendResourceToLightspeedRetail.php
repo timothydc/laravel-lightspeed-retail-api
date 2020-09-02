@@ -198,6 +198,6 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
     public function middleware(): array
     {
-        return [new RateLimited('ls-retail-api', 3, 1, 100)];
+        return [new RateLimited('ls-retail-api', 300, 300, 300)];
     }
 }
