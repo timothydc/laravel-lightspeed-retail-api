@@ -4,12 +4,12 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Jobs;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use TimothyDC\LightspeedRetailApi\Actions\SaveLightspeedRetailResourceAction;
 use TimothyDC\LightspeedRetailApi\Events\ResourceSendEvent;
