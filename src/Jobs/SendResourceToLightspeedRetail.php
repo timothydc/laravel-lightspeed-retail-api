@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Jobs;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\App;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -198,6 +199,10 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
     public function middleware(): array
     {
+        if (App::runningUnitTests()) {
+            return [];
+        }
+
         return [new RateLimited('ls-retail-api', 300, 300, 300)];
     }
 }
