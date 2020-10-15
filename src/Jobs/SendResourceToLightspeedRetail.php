@@ -144,7 +144,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
     private function loadRelationship(): void
     {
         // replace relationships
-        $relations = collect($this->payload)->filter(fn ($item) => Str::contains($item, '.id'));
+        $relations = collect($this->payload)->filter(fn ($item) => is_string($item) && Str::contains($item, '.id'));
 
         foreach ($relations as $lightspeedForeignKey => $localeForeignKey) {
             [$relatedObject] = explode('.id', $localeForeignKey);
