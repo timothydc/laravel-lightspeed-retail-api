@@ -205,7 +205,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
         return [
             new RateLimited('ls-retail-api-throttle', 3, 1, 1),
-            new RateLimited('ls-retail-api-limit', 300, 300, 300)
+            new RateLimited('ls-retail-api-limit', 300, 300, 300),
         ];
     }
 }
