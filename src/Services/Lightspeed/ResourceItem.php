@@ -27,6 +27,7 @@ class ResourceItem extends Resource
     public static string $tax = 'tax';
     public static string $defaultCost = 'defaultCost';
     public static string $note = 'note';
+    public static string $customFields = 'CustomFieldValues';
 
     /**
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
