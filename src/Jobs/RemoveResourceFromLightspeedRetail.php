@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\IncorrectModelConfigurationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\MissingLightspeedResourceException;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
+use TimothyDC\LightspeedRetailApi\Jobs\Middleware\RateLimited;
 use TimothyDC\LightspeedRetailApi\Traits\HasLightspeedRetailResources;
 
 class RemoveResourceFromLightspeedRetail implements ShouldQueue
@@ -88,5 +90,17 @@ class RemoveResourceFromLightspeedRetail implements ShouldQueue
         }
 
         return true;
+    }
+
+    public function middleware(): array
+    {
+        if (App::runningUnitTests()) {
+            return [];
+        }
+
+        return [
+            new RateLimited('ls-retail-api-throttle', 3, 1, 1),
+            new RateLimited('ls-retail-api-limit', 300, 300, 300)
+        ];
     }
 }
