@@ -12,7 +12,7 @@
     "keywords": ["timothydc", "lightspeed", "retail", "laravel"],
     "require": {
         "php": "^7.4",
-        "guzzlehttp/guzzle": "^6.5",
+        "guzzlehttp/guzzle": "^6.5|^7.0.1",
         "ext-json": "*"
     },
     "require-dev": {
