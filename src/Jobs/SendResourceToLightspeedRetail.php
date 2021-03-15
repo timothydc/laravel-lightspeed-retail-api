@@ -110,6 +110,10 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
             // update API resource
             $this->getApiClientobject()->update($this->model->lightspeedRetailResource->lightspeed_id, $this->payload);
+
+            // bump timestamp
+            $this->model->lightspeedRetailResource->updated_at = now();
+            $this->model->lightspeedRetailResource->save();
         }
 
         event(new ResourceSendEvent($this->model->lightspeedRetailResource));
