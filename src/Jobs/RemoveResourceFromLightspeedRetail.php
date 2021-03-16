@@ -37,6 +37,8 @@ class RemoveResourceFromLightspeedRetail implements ShouldQueue
 
     public function __construct(Model $model, string $resource, int $lightspeedId)
     {
+        $this->onQueue(config('lightspeed-retail.queue'));
+
         $this->model = $model;
         $this->resource = $resource;
         $this->lightspeedId = $lightspeedId;
@@ -99,8 +101,7 @@ class RemoveResourceFromLightspeedRetail implements ShouldQueue
         }
 
         return [
-            new RateLimited('ls-retail-api-throttle', 3, 1, 1),
-            new RateLimited('ls-retail-api-limit', 300, 300, 300),
+            new RateLimited('ls-retail-api-throttle', 3, 1, 3),
         ];
     }
 }

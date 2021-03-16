@@ -43,6 +43,8 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 
     public function __construct(Model $model, string $resource, array $payload)
     {
+        $this->onQueue(config('lightspeed-retail.queue'));
+
         $this->model = $model;
         $this->resource = $resource;
         $this->payload = $payload;
@@ -208,8 +210,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         }
 
         return [
-            new RateLimited('ls-retail-api-throttle', 3, 1, 1),
-            new RateLimited('ls-retail-api-limit', 300, 300, 300),
+            new RateLimited('ls-retail-api-throttle', 3, 1, 3),
         ];
     }
 }
