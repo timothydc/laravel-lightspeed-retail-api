@@ -22,5 +22,14 @@ return [
          * When this is set to TRUE, an exception will be thrown when calling the API when you have not authenticated your client.
          */
         'throw_on_unauthorized' => false,
-    ]
+    ],
+    /*
+     * Set the queue on which the jobs are send
+     */
+    'queue' => env('LIGHTSPEED_RETAIL_QUEUE', 'default'),
+    /*
+     * Set the type of cache store to use when processing the API leaking bucket.
+     * You can choose a Cache Store value from your cache.php file
+     */
+    'cache_store' => env('LIGHTSPEED_RETAIL_CACHE_STORE', 'redis'),
 ];

@@ -10,6 +10,7 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -32,23 +33,33 @@ class ApiClient
 
     private string $baseUrl = 'https://api.merchantos.com/API/Account/';
 
-    public int $last_req_time;
     private string $client_id;
     private string $client_secret;
     private TokenRepository $tokenRepository;
 
-    private array $bucket = [
-        'drip' => 1,
-        'size' => 60,
-        'level' => 0,
-        'available' => 60,
-    ];
+    protected array $bucket = [];
+    protected string $bucketCacheKey;
+    protected string $cacheStore;
 
     public function __construct(TokenRepository $tokenRepository)
     {
         $this->client_id = config('lightspeed-retail.api.key');
         $this->client_secret = config('lightspeed-retail.api.secret');
+        $this->cacheStore = config('lightspeed-retail.cache_store');
         $this->tokenRepository = $tokenRepository;
+
+        $this->bucketCacheKey = $this->client_id . '_retail_api_bucket';
+
+        // set initial bucket if none is found
+        if (Cache::store($this->cacheStore)->has($this->bucketCacheKey) === false) {
+            Cache::store($this->cacheStore)->set($this->bucketCacheKey, [
+                'drip' => 1,
+                'size' => 60,
+                'level' => 0,
+                'available' => 60,
+                'timestamp' => now(),
+            ]);
+        }
     }
 
     public function isConfigured(): bool
@@ -377,14 +388,22 @@ class ApiClient
     protected function checkBucket(): callable
     {
         return function (RequestInterface $request) {
+
+            // if bucket is empty - get from redis
+            if ($this->bucket === []) {
+                $this->bucket = Cache::store($this->cacheStore)->get($this->bucketCacheKey);
+            }
+
             $cost = strtolower($request->getMethod()) === 'get' ? 1 : 10;
-            $overflow = $cost - $this->bucket['available'];
+            $remainingCost = $cost - $this->bucket['available'];
 
-            if ($overflow > 0) {
-                $sleep_time = $overflow / $this->bucket['drip'];
-                $time_since_last = time() - $this->last_req_time;
+            if ($remainingCost > 0) {
+                $sleep_time = $remainingCost / $this->bucket['drip'];
 
-                if ($sleep_time > $time_since_last) {
+                // check if the time that we need to sleep is larger than the last time we tried sending a request,
+                // if so then sleep cus our bucket needs more time to fill
+                // if not, then our bucket should have enough available drops to process our request
+                if (isset($this->bucket['last_req_time']) && $sleep_time > (time() - $this->bucket['last_req_time'])) {
                     $sleep_microseconds = ceil($sleep_time * 1000000);
                     Log::debug(self::class . ' Notice: Rate limit reached, sleeping ' . $sleep_microseconds / 1000000 . ' seconds.');
                     usleep((int)$sleep_microseconds);
@@ -411,15 +430,21 @@ class ApiClient
 
             if (count($bucket_header) > 0) {
                 $bucket = explode('/', $bucket_header[0]);
+
                 $this->bucket = [
-                    'level' => $bucket[0],
-                    'size' => $bucket[1],
-                    'available' => $bucket[1] - $bucket[0],
                     'drip' => $bucket[1] / 60,
+                    'size' => $bucket[1],
+                    'level' => $bucket[0],
+                    'available' => $bucket[1] - $bucket[0],
                 ];
             }
 
-            $this->last_req_time = time();
+            // set timestamp since we last got a response
+            $this->bucket['timestamp'] = now()->toIso8601String();
+            $this->bucket['last_req_time'] = time();
+
+            // cache bucket rate
+            Cache::store($this->cacheStore)->set($this->bucketCacheKey, $this->bucket);
 
             return $response;
         };
