@@ -27,7 +27,6 @@ class DispatchLightspeedRetailResourceAction
                     )
                     ->toArray()
             );
-
         } else {
             $filteredPayloads->each(fn ($payload) => SendResourceToLightspeedRetail::dispatchNow(...array_values($payload)));
         }
