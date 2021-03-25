@@ -37,13 +37,9 @@ class RateLimited
             ->every($this->every)
             ->then(
                 function () use ($next, $job) {
-                    logger('execute job');
-
                     $next($job);
                 },
                 function () use ($release, $job) {
-                    logger('delayed job', ['release' => $release]);
-
                     $job->release($release);
                 }
             );
