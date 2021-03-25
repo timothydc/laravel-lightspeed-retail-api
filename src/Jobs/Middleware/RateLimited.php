@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Jobs\Middleware;
 
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Redis;
 
 class RateLimited
@@ -13,7 +14,7 @@ class RateLimited
     private int $allow;
     private int $release;
 
-    public function __construct(string $throttleKey, int $allow = 285, int $every = 300, int $release = 60)
+    public function __construct(string $throttleKey, int $allow = 3, int $every = 2, int $release = 10)
     {
         $this->throttleKey = $throttleKey;
         $this->allow = $allow;
@@ -23,12 +24,28 @@ class RateLimited
 
     public function handle($job, $next): void
     {
+        if (App::runningUnitTests()) {
+            $next($job);
+
+            return;
+        }
+
+        $release = $this->release;
+
         Redis::throttle($this->throttleKey)
             ->allow($this->allow)
             ->every($this->every)
             ->then(
-                fn () => $next($job),
-                fn () => $job->release($this->release),
+                function () use ($next, $job) {
+                    logger('execute job');
+
+                    $next($job);
+                },
+                function () use ($release, $job) {
+                    logger('delayed job', ['release' => $release]);
+
+                    $job->release($release);
+                }
             );
     }
 }

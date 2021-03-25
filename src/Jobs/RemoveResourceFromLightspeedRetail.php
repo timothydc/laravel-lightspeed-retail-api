@@ -101,7 +101,7 @@ class RemoveResourceFromLightspeedRetail implements ShouldQueue
         }
 
         return [
-            new RateLimited('ls-retail-api-throttle', 3, 1, 3),
+            new RateLimited('ls-retail-api-throttle'),
         ];
     }
 }
