@@ -26,7 +26,7 @@ class ResourceItem extends Resource
     public static string $modelYear = 'modelYear';
     public static string $tax = 'tax';
     public static string $defaultCost = 'defaultCost';
-    public static string $note = 'note';
+    public static string $note = 'Note';
     public static string $customFields = 'CustomFieldValues';
 
     /**
