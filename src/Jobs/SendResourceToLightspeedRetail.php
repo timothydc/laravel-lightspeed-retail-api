@@ -208,4 +208,17 @@ class SendResourceToLightspeedRetail implements ShouldQueue
     {
         return now()->addDay();
     }
+
+    public function failed(\Throwable $exception): void
+    {
+        // requeue when the job failed?
+        if ($exception instanceof \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException && Str::contains($exception->getMessage(), ['Rate Limit Exceeded'])) {
+            logger('requeue customer job (rate limit exceed)', [$this->model->id, $this->payload]);
+            self::dispatch($this->model, $this->resource, $this->payload)->delay(now()->addMinutes(4));
+
+        } elseif ($exception instanceof \Illuminate\Queue\MaxAttemptsExceededException) {
+            logger('requeue customer job (timed out):', [$this->model->id, $this->payload]);
+            self::dispatch($this->model, $this->resource, $this->payload)->delay(now()->addMinutes(4));
+        }
+    }
 }
