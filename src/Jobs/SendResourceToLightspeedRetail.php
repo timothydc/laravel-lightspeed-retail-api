@@ -27,16 +27,6 @@ class SendResourceToLightspeedRetail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /*
-     * Times the job will be retried
-     */
-    public $tries = 5;
-
-    /*
-     * The number of seconds to wait before retrying the job
-     */
-    public $retryAfter = 10;
-
     private Model $model;
     private string $resource;
     private array $payload;
@@ -210,7 +200,12 @@ class SendResourceToLightspeedRetail implements ShouldQueue
         }
 
         return [
-            new RateLimited('ls-retail-api-throttle'),
+            new RateLimited('ls-retail-api-throttle', 1, 10, 5 * $this->attempts()),
         ];
+    }
+
+    public function retryUntil()
+    {
+        return now()->addDay();
     }
 }
