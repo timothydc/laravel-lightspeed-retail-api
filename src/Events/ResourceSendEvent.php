@@ -12,14 +12,16 @@ class ResourceSendEvent
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $lightspeedRetailResource;
+    public $payload;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(LightspeedRetailResource $lightspeedRetailResource)
+    public function __construct(LightspeedRetailResource $lightspeedRetailResource, array $payload = [])
     {
         $this->lightspeedRetailResource = $lightspeedRetailResource;
+        $this->payload = $payload;
     }
 }

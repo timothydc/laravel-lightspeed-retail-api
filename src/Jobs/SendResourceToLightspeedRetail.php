@@ -108,7 +108,7 @@ class SendResourceToLightspeedRetail implements ShouldQueue
             $this->model->lightspeedRetailResource->save();
         }
 
-        event(new ResourceSendEvent($this->model->lightspeedRetailResource));
+        event(new ResourceSendEvent($this->model->lightspeedRetailResource, $this->payload));
     }
 
     private function getApiClientobject(): \TimothyDC\LightspeedRetailApi\Resource
