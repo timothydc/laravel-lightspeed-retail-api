@@ -8,7 +8,7 @@
 Via Composer
 
 ``` bash
-$ composer require timothydc/laravel-lightspeed-retail-api
+composer require timothydc/laravel-lightspeed-retail-api
 ```
 
 ## Usage
@@ -40,16 +40,16 @@ LIGHTSPEED_RETAIL_API_SECRET=xxx
 You can publish all resources, or you may choose to publish them separately:
 
 ```bash
-$ php artisan vendor:publish --tag="lightspeed-api"
+php artisan vendor:publish --tag="lightspeed-api"
 
-$ php artisan vendor:publish --tag="lightspeed-api:config"
-$ php artisan vendor:publish --tag="lightspeed-api:migrations"
+php artisan vendor:publish --tag="lightspeed-api:config"
+php artisan vendor:publish --tag="lightspeed-api:migrations"
 ```
 
 The API tokens are stored in the database, by default. So run your migrations.
 
 ```bash
-$ php artisan migrate
+php artisan migrate
 ```
 
 
