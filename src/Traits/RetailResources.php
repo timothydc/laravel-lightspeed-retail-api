@@ -8,6 +8,7 @@ use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceCategory;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceCustomer;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceItem;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceManufacturer;
+use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceSale;
 use TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceVendor;
 
 trait RetailResources
@@ -35,6 +36,11 @@ trait RetailResources
     public function manufacturer(): ResourceManufacturer
     {
         return new ResourceManufacturer($this);
+    }
+
+    public function sale(): ResourceSale
+    {
+        return new ResourceSale($this);
     }
 
     public function vendor(): ResourceVendor
