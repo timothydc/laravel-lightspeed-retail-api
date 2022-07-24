@@ -198,14 +198,18 @@ class ApiClient
     /**
      * @param string $code
      * @throws AuthenticationException
+     * @return int
      */
-    public function startUpClient(string $code): void
+    public function startUpClient(string $code): int
     {
         // trade temp code for access and refresh code
         $this->storeInitialAccessToken($code);
 
         // save account id
         $this->tokenRepository->saveToken(['account_id' => $this->account()->get()->get('accountID')]);
+
+        // return the accountID
+        return $this->account()->get()->get('accountID');
     }
 
     /**
