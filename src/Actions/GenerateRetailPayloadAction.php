@@ -23,14 +23,12 @@ class GenerateRetailPayloadAction
             foreach ($resourceMapping as $apiColumn => $attribute) {
                 $localAttribute = $attribute;
                 $value = $attribute;
-
                 // map the "dirty" column with the mutated value
                 if (is_array($attribute)) {
                     $localAttribute = head($attribute);
                     $value = last($attribute);
                 }
-
-                if ($forcePayload === false && ! in_array($localAttribute, $model->lsForceSyncFields ?? [], true) && $model->isDirty($localAttribute) === false) {
+                if (!is_numeric($value) && $forcePayload === false && ! in_array($localAttribute, $model->lsForceSyncFields ?? [], true) && $model->isDirty($localAttribute) === false) {
                     continue;
                 }
 
@@ -60,7 +58,9 @@ class GenerateRetailPayloadAction
                 } else {
                     $resourceColumnValue = $model->$value;
                 }
-
+                if(is_numeric($value)) {
+                    $resourceColumnValue = $value;
+                }
                 // default mapping -> the order of these parameters is important
                 $payloads[$resource]['model'] = $model->withoutRelations();
                 $payloads[$resource]['resource'] = $resource;
