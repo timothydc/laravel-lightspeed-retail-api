@@ -62,11 +62,6 @@ class ApiClient
         }
     }
 
-    public function getAccountId(): int
-    {
-        return $this->tokenRepository->getAccountId();
-    }
-
     public function isConfigured(): bool
     {
         return $this->tokenRepository->exists();
