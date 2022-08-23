@@ -117,6 +117,9 @@ $categories = LightspeedRetailApi::api()->category()->get(20);
 
 // same as above, but better
 $categories = LightspeedRetailApi::api()->category()->first(20);
+
+// some resources support custom arguments
+$label = LightspeedRetailApi::api()->itemAsLabel()->getLabelById('1', 'ItemLabel', true);
 ```
 
 Note that not all [resources][ls-added-resources] are added (yet). Feel free to add them yourself via a pull request!
@@ -185,6 +188,8 @@ The second item is the value that will be sent to Lightspeed. It also accepts [m
 
 In case of a relationship, the first value is the local foreign key.
 The second, is the related primary key.
+
+You can also use numeric values to override the resource mapping completely. This may be useful if you are wanting to send an ID that you might not be storing in your DB, such as your Shop ID.
     
 ```php
 public function getArchivedAttribute(): bool

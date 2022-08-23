@@ -62,6 +62,11 @@ class ApiClient
         }
     }
 
+    public function getAccountId(): int
+    {
+        return $this->tokenRepository->getAccountId();
+    }
+
     public function isConfigured(): bool
     {
         return $this->tokenRepository->exists();
@@ -69,11 +74,11 @@ class ApiClient
 
     public function getAll(string $resource = null, int $id = null, array $query = []): Collection
     {
-        if (! array_key_exists('offset', $query)) {
+        if (!array_key_exists('offset', $query)) {
             $query['offset'] = 0;
         }
 
-        if (! array_key_exists('limit', $query)) {
+        if (!array_key_exists('limit', $query)) {
             $query['limit'] = self::API_RESULT_LIMIT;
         }
 
@@ -94,18 +99,29 @@ class ApiClient
         return collect($results);
     }
 
-    public function get(string $resource = null, int $id = null, array $query = []): Collection
+    public function get(
+        string $resource = null,
+        int $id = null,
+        array $query = [],
+        $additionalHeaders = [],
+        $fileExtension = null,
+        $customResource = null,
+    ): Collection|string
     {
-        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
+        $responseObject = Http::withHeaders(array_merge(['Accept' => 'application/json'], $additionalHeaders))
             ->withOptions(['handler' => $this->createHandlerStack()])
-            ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
+            ->get($this->getUrl($resource, $id, $fileExtension) . $this->buildQueryString($query));
 
         $this->logAction('GET ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
 
         $response = $responseObject->json();
 
+        //If we're requesting HTMl, just return our HTML
+        if($additionalHeaders['Content-Type'] === 'text/html') {
+            return $responseObject->body();
+        }
         // unstructured way of requesting the "Account" resource
-        if (! $resource) {
+        if (!$resource) {
             return collect($response['Account']);
         }
 
@@ -113,7 +129,10 @@ class ApiClient
         if (isset($response['@attributes']['count']) && $response['@attributes']['count'] === 1) {
             $response[$resource] = [$response[$resource]];
         }
-
+        //In some cases, Lightspeed might return an array key with a resource name that is slightly different to what we expect
+        if($customResource) {
+            $resource = $customResource;
+        }
         return collect($response[$resource] ?? []);
     }
 
@@ -186,13 +205,13 @@ class ApiClient
         }
     }
 
-    private function getUrl(string $resource = null, int $id = null): string
+    private function getUrl(string $resource = null, int $id = null, string $extension = null): string
     {
-        if (! $resource) {
+        if (!$resource) {
             return $this->baseUrl;
         }
 
-        return $this->baseUrl . $this->tokenRepository->getAccountId() . ($resource ? '/' . $resource : '') . ($id ? '/' . $id : '');
+        return $this->baseUrl . $this->tokenRepository->getAccountId() . ($resource ? '/' . $resource : '') . ($id ? '/' . $id : '') . ($extension ? '.' . $extension : '');
     }
 
     /**
