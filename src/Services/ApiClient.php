@@ -111,7 +111,7 @@ class ApiClient
 
         $response = $responseObject->json();
 
-        //If we're requesting HTMl, just return our HTML
+        //If we're requesting HTML, just return our HTML
         if($additionalHeaders['Content-Type'] === 'text/html') {
             return $responseObject->body();
         }
