@@ -28,6 +28,8 @@ class ResourceItem extends Resource
     public static string $defaultCost = 'defaultCost';
     public static string $note = 'Note';
     public static string $customFields = 'CustomFieldValues';
+    public static string $shopId = 'shopId';
+    public static string $defaultQty = 'defaultyQty';
 
     /**
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
@@ -67,7 +69,7 @@ class ResourceItem extends Resource
     protected function formatPayload(array $payload, int $id = null): array
     {
         $payload = $this->adjustPricePayload($payload);
-
+        $payload = $this->adjustQuantityPayload($payload);
         return $payload;
     }
 
@@ -81,6 +83,21 @@ class ResourceItem extends Resource
             ];
 
             unset($payload[self::$defaultPrice]);
+        }
+
+        return $payload;
+    }
+
+    private function adjustQuantityPayload(array $payload): array
+    {
+        if (array_key_exists(self::$shopId, $payload) && array_key_exists(self::$defaultQty, $payload)) {
+            $payload['ItemShops']['ItemShop'][] = [
+                'qoh' => $payload[self::$defaultQty],
+                'shopID' => $payload[self::$shopId],
+            ];
+
+            unset($payload[self::$defaultQty]);
+            unset($payload[self::$shopId]);
         }
 
         return $payload;
