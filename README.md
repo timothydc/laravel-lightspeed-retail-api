@@ -185,6 +185,8 @@ The second item is the value that will be sent to Lightspeed. It also accepts [m
 
 In case of a relationship, the first value is the local foreign key.
 The second, is the related primary key.
+
+You can also use numeric values to override the resource mapping completely. This may be useful if you are wanting to send an ID that you might not be storing in your DB, such as your Shop ID.
     
 ```php
 public function getArchivedAttribute(): bool
