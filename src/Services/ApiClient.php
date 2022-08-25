@@ -112,7 +112,7 @@ class ApiClient
         $response = $responseObject->json();
 
         //If we're requesting HTML, just return our HTML
-        if($additionalHeaders['Content-Type'] === 'text/html') {
+        if(isset($additionalHeaders['Content-Type']) &&$additionalHeaders['Content-Type'] === 'text/html') {
             return $responseObject->body();
         }
         // unstructured way of requesting the "Account" resource
