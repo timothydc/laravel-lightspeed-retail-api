@@ -63,13 +63,13 @@ class ResourceItem extends Resource
 
     public function update(int $id, array $payload): Collection
     {
-        return parent::update($id, $this->formatPayload($payload, $id));
+        return parent::update($id, $this->formatPayload($payload, $id, true));
     }
 
-    protected function formatPayload(array $payload, int $id = null): array
+    protected function formatPayload(array $payload, int $id = null, $updating = false): array
     {
         $payload = $this->adjustPricePayload($payload);
-        $payload = $this->adjustQuantityPayload($payload);
+        $payload = $this->adjustQuantityPayload($payload, $updating, $id);
         return $payload;
     }
 
@@ -88,18 +88,43 @@ class ResourceItem extends Resource
         return $payload;
     }
 
-    private function adjustQuantityPayload(array $payload): array
+    private function adjustQuantityPayload(array $payload, $updating = false, $id = null): array
     {
         if (array_key_exists(self::$shopId, $payload) && array_key_exists(self::$defaultQty, $payload)) {
-            $payload['ItemShops']['ItemShop'][] = [
-                'qoh' => $payload[self::$defaultQty],
-                'shopID' => $payload[self::$shopId],
-            ];
+            if(!$updating) {
+                $payload['ItemShops']['ItemShop'][] = [
+                    'qoh' => $payload[self::$defaultQty],
+                    'shopID' => $payload[self::$shopId],
+                ];
+            } else {
+                $shopId = $this->getItemShopId($id, $payload[self::$shopId]);
+                //If we can't find our shop id, don't try to update our quantity
+                if($shopId === null) {
+                    unset($payload[self::$defaultQty]);
+                    unset($payload[self::$shopId]);
+                    return $payload;
+                }
+                $payload['ItemShops']['ItemShop'][] = [
+                    'itemShopID' => $shopId,
+                    'qoh' => $payload[self::$defaultQty],
+                ];
+            }
 
             unset($payload[self::$defaultQty]);
             unset($payload[self::$shopId]);
         }
 
         return $payload;
+    }
+
+    public function getItemShopId($id, $shopId)
+    {
+        $item = $this->client->item()->get($id, ['load_relations' => ['ItemShops']]);
+        foreach($item['ItemShops']['ItemShop'] as $itemShop) {
+            if($itemShop['shopID'] == $shopId) {
+                return $itemShop['itemShopID'];
+            }
+        }
+        return null;
     }
 }
