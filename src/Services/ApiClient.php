@@ -31,7 +31,7 @@ class ApiClient
     public const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
     public const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
 
-    private string $baseUrl = 'https://api.merchantos.com/API/Account/';
+    private string $baseUrl = 'https://api.lightspeedapp.com/API/V3/Account/';
 
     private string $client_id;
     private string $client_secret;
