@@ -110,7 +110,7 @@ use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 $account = LightspeedRetailApi::api()->account()->get();
 
 // filter with GET (with a limit and custom sorting
-$categories = LightspeedRetailApi::api()->category()->get(null, ['limit' => 10, 'orderby' => 'name']);
+$categories = LightspeedRetailApi::api()->category()->get(null, ['limit' => 10, 'sort' => 'name']);
 
 // get category with ID 20
 $categories = LightspeedRetailApi::api()->category()->get(20);
