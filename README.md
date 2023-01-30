@@ -95,7 +95,7 @@ Route::get('your-redirect-uri', [SaveAccessTokenController::class, '__invoke']);
 
 ### Configure controller
 The `SaveAccessTokenController` will store the initial access token and make follow-up request for the refresh token.
-Afterwards you will be redirected to your `home` route.
+Afterwards you will be redirected to `RouteServiceProvider::HOME`.
 If you would like to alter the redirect you may extend this controller.
 
 
