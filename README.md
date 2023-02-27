@@ -104,12 +104,13 @@ If you would like to alter the redirect you may extend this controller.
 You can now access the API. All resources return a [Laravel collection][laravel-docs-collections]... which means lots of fun!
 
 ```php
+
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
 // get all
 $account = LightspeedRetailApi::api()->account()->get();
 
-// filter with GET (with a limit and custom sorting
+// filter with GET with a limit and custom sorting (full details: https://developers.lightspeedhq.com/retail/introduction/parameters/)
 $categories = LightspeedRetailApi::api()->category()->get(null, ['limit' => 10, 'sort' => 'name']);
 
 // get category with ID 20
@@ -117,6 +118,7 @@ $categories = LightspeedRetailApi::api()->category()->get(20);
 
 // same as above, but better
 $categories = LightspeedRetailApi::api()->category()->first(20);
+
 ```
 
 Note that not all [resources][ls-added-resources] are added (yet). Feel free to add them yourself via a pull request!
@@ -132,7 +134,46 @@ $categories = LightspeedRetailApi::api()->category()->get(null, ['categoryID' =>
 // get categories with their parent relation
 $categories = LightspeedRetailApi::api()->category()->get(null, ['load_relations' => ['Parent']]);
 
+// get sales sorted by timestamp in descending order
+$sales = LightspeedRetailApi::api()->sale()->get(null, ['sort' => '-timestamp']);
+
 ```
+
+#### Pagination
+As of V3 of the Lightspeed Retail API the pagination works cursor based.
+The full details of on how pagination works, you can find in the [Pagination API documantion](https://developers.lightspeedhq.com/retail/introduction/pagination/)
+
+```php
+
+use \TimothyDC\LightspeedRetailApi\Services\Lightspeed\ResourceSale;
+
+$response = LightspeedRetailApi::api()->sale()->getWithPagination();
+
+$attributes = $response['@attributes'];
+
+// collect([
+//      'next' => (request url),
+//      'previous' => (request url),
+//      'after' => (token),
+//      'before' => (token),
+//  ])
+
+$sales = $response[ResourceSale::$resource];
+
+// Sales data as a collection
+
+```
+
+To get the next page of the resource, add the 'after' token to your request.
+
+```php
+
+$response = LightspeedRetailApi::api()->sale()->getWithPagination(null, ['after' => $attributes->after]);
+
+```
+
+The after attribute will be empty on the last page and the 'before' attribute will be empty on the first page.
+This is the same as the 'next' and 'previous' attributes as described in the [Pagination API documantion](https://developers.lightspeedhq.com/retail/introduction/pagination/)
 
 ---
 
