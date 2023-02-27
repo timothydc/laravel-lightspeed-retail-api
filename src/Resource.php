@@ -29,6 +29,11 @@ class Resource
         return $this->client->get(static::$resource, $id, $query);
     }
 
+    public function getWithPagination(int $id = null, array $query = []): Collection
+    {
+        return $this->client->getWithPagination(static::$resource, $id, $query);
+    }
+
     /**
      * @throws \TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException
      */
