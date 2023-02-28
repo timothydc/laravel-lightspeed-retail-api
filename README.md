@@ -141,7 +141,7 @@ $sales = LightspeedRetailApi::api()->sale()->get(null, ['sort' => '-timestamp'])
 
 #### Pagination
 As of V3 of the Lightspeed Retail API the pagination works cursor based.
-The full details of on how pagination works, you can find in the [Pagination API documantion](https://developers.lightspeedhq.com/retail/introduction/pagination/)
+The full details of on how pagination works, you can find in the [Pagination API documentation](https://developers.lightspeedhq.com/retail/introduction/pagination/)
 
 ```php
 
@@ -172,8 +172,8 @@ $response = LightspeedRetailApi::api()->sale()->getWithPagination(null, ['after'
 
 ```
 
-The after attribute will be empty on the last page and the 'before' attribute will be empty on the first page.
-This is the same as the 'next' and 'previous' attributes as described in the [Pagination API documantion](https://developers.lightspeedhq.com/retail/introduction/pagination/)
+The 'after' attribute will be empty on the last page and the 'before' attribute will be empty on the first page.
+This is the same as the 'next' and 'previous' attributes as described in the [Pagination API documentation](https://developers.lightspeedhq.com/retail/introduction/pagination/)
 
 ---
 
