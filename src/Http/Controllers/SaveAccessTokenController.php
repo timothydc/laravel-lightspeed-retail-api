@@ -4,12 +4,14 @@ declare(strict_types=1);
 namespace TimothyDC\LightspeedRetailApi\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Providers\RouteServiceProvider;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use TimothyDC\LightspeedRetailApi\Facades\LightspeedRetailApi;
 
 class SaveAccessTokenController extends Controller
 {
-    public function __invoke(Request $request): \Illuminate\Http\RedirectResponse
+    public function __invoke(Request $request): RedirectResponse
     {
         // save access token
         LightspeedRetailApi::api()->startUpClient($request->get('code'));
@@ -26,6 +28,6 @@ class SaveAccessTokenController extends Controller
 
         return property_exists($this, 'redirectTo')
             ? $this->redirectTo
-            : route('home');
+            : RouteServiceProvider::HOME;
     }
 }

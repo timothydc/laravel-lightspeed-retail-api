@@ -59,7 +59,8 @@ trait QueryBuilder
             }
 
             if (! is_array($query)) {
-                $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . urlencode((string)$query);
+                $query = $column !== 'after' && $column !== 'before' ? urlencode((string) $query) : $query;
+                $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . $query;
 
                 continue;
             }

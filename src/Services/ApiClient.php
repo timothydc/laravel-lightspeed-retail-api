@@ -31,7 +31,7 @@ class ApiClient
     public const GRANT_TYPE_AUTHORIZATION_CODE = 'authorization_code';
     public const GRANT_TYPE_REFRESH_TOKEN = 'refresh_token';
 
-    private string $baseUrl = 'https://api.merchantos.com/API/Account/';
+    private string $baseUrl = 'https://api.lightspeedapp.com/API/V3/Account/';
 
     private string $client_id;
     private string $client_secret;
@@ -115,6 +115,50 @@ class ApiClient
         }
 
         return collect($response[$resource] ?? []);
+    }
+
+    public function getWithPagination(string $resource = null, int $id = null, array $query = []): Collection
+    {
+        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
+            ->withOptions(['handler' => $this->createHandlerStack()])
+            ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
+
+        $this->logAction('GET ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
+
+        $response = $responseObject->json();
+
+        // unstructured way of requesting the "Account" resource
+        if (! $resource) {
+            return collect($response['Account']);
+        }
+
+        // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
+        if (isset($response['@attributes']['count']) && $response['@attributes']['count'] === 1) {
+            $response[$resource] = [$response[$resource]];
+        }
+
+        $attributes = $response['@attributes'];
+        $after = '';
+        $before = '';
+
+        if ($attributes['next'] !== '') {
+            $matches = [];
+            preg_match('/after=([^&]+)/', $attributes['next'], $matches);
+            $after = array_key_exists(1, $matches) ? $matches[1] : '';
+        }
+
+        if ($attributes['previous'] !== '') {
+            $matches = [];
+            preg_match('/before=([^&]+)/', $attributes['previous'], $matches);
+            $before = array_key_exists(1, $matches) ? $matches[1] : '';
+        }
+
+        $attributes['after'] = $after;
+        $attributes['before'] = $before;
+        $response['@attributes'] = collect($attributes);
+        $response[$resource] = collect($response[$resource] ?? []);
+
+        return collect($response);
     }
 
     /**
