@@ -63,7 +63,7 @@ More information on the scopes can be found in the [documentation][ls-docs-scope
 #### Via command line
 
 ```bash
-$ php artisan retail:auth
+php artisan retail:auth
 ```
 
 The command will ask you about the scope, and you will get an URL in return. Excellent deal!
@@ -131,8 +131,8 @@ If you would like to filter the `GET`-results you can [look at the query paramet
 // get categories with an ID > 10
 $categories = LightspeedRetailApi::api()->category()->get(null, ['categoryID' => ['operator' => '>', 'value' => 10]]);
 
-// get categories with their parent relation
-$categories = LightspeedRetailApi::api()->category()->get(null, ['load_relations' => ['Parent']]);
+// get products with their "Category" and "Note" relation
+$products = LightspeedRetailApi::api()->item()->get(null, ['load_relations' => ['Category', 'Note']]);
 
 // get sales sorted by timestamp in descending order
 $sales = LightspeedRetailApi::api()->sale()->get(null, ['sort' => '-timestamp']);

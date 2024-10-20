@@ -47,7 +47,7 @@ trait QueryBuilder
 
         foreach ($parameters as $column => $query) {
             if ($column === 'load_relations' && is_array($query)) {
-                $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . sprintf('["%s"]', implode(',', $query));
+                $queryParameters[] = $column . $this->_getOperator($this->operator_equal) . json_encode($query, JSON_THROW_ON_ERROR);
 
                 continue;
             }
