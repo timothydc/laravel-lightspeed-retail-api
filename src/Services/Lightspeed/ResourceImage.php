@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace TimothyDC\LightspeedRetailApi\Services\Lightspeed;
 
-use Illuminate\Support\Collection;
-use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Resource;
 
 class ResourceImage extends Resource
@@ -17,5 +15,5 @@ class ResourceImage extends Resource
     public static string $publicID = 'publicID';
     public static string $itemID = 'itemID';
     public static string $Item = 'Item';
-    public static string $ItemMatrix	 = 'ItemMatrix';
+    public static string $ItemMatrix = 'ItemMatrix';
 }
