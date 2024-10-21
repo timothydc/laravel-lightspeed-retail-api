@@ -5,10 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Upgrade OAuth endpoints
+- Update available scopes
 
 ## [v1.1.0] - 2024-10-21
 ### Changed
--  Upgrade pagination to v3 for `getAll()`
+- Upgrade pagination to v3 for `getAll()`
 
 ## [v1.0.0] - 2024-10-20
 ### Fixed

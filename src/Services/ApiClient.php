@@ -236,9 +236,9 @@ class ApiClient
         ]);
     }
 
-    protected function requestRefreshToken(string $code): Response
+    protected function requestRefreshToken(string $code, string $scope): Response
     {
-        return $this->requestToken($code, self::GRANT_TYPE_REFRESH_TOKEN);
+        return $this->requestToken($code, self::GRANT_TYPE_REFRESH_TOKEN, $scope);
     }
 
     protected function requestAccessToken(string $code): Response
@@ -246,13 +246,17 @@ class ApiClient
         return $this->requestToken($code, self::GRANT_TYPE_AUTHORIZATION_CODE);
     }
 
-    protected function requestToken($code, string $grantType): Response
+    protected function requestToken($code, string $grantType, ?string $scope = null): Response
     {
         $postFields = [
             'client_id' => $this->client_id,
             'client_secret' => $this->client_secret,
             'grant_type' => $grantType,
         ];
+
+        if ($scope) {
+            $postFields += ['scope' => $this->filterInvalidScopes($scope)];
+        }
 
         switch ($grantType) {
             case self::GRANT_TYPE_AUTHORIZATION_CODE:
@@ -265,7 +269,7 @@ class ApiClient
                 break;
         }
 
-        return Http::post('https://cloud.lightspeedapp.com/oauth/access_token.php', $postFields);
+        return Http::post('https://cloud.lightspeedapp.com/auth/oauth/token', $postFields);
     }
 
     protected function createHandlerStack(): HandlerStack
@@ -459,11 +463,15 @@ class ApiClient
 
     protected function refreshToken(): void
     {
-        $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken());
+        $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken(), $this->tokenRepository->getScope());
         $response = $responseObject->json();
 
         if ($response) {
-            $this->tokenRepository->saveToken(['access_token' => $response['access_token'], 'expires_in' => 3600]);
+            $this->tokenRepository->saveToken([
+                'refresh_token' => $response['refresh_token'] ?? null,
+                'access_token' => $response['access_token'] ?? null,
+                'expires_in' => $response['expires_in'] ?? null,
+            ]);
         } else {
             Log::emergency(self::class . ' Unable to refresh token.', [$response]);
         }
@@ -496,5 +504,23 @@ class ApiClient
         $attributes['before'] = $before ?? '';
 
         return collect($attributes);
+    }
+
+    /**
+     * This method will filter out the deprecated "systemuserid:{number}" scope
+     */
+    protected function filterInvalidScopes(string $scope): string
+    {
+        if (! str_contains($scope, 'systemuserid')) {
+            return $scope;
+        }
+        
+        return collect(explode(' ', $scope))
+            ->mapWithKeys(function ($value) {
+                $keyValue = explode(':', $value);
+                return [$keyValue[0] => $keyValue[1]];
+            })
+            ->filter(fn($value, $key) => $key !== 'systemuserid')
+            ->implode(' ');
     }
 }
