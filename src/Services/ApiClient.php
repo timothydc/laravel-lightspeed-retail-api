@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use TimothyDC\LightspeedRetailApi\Actions\ParseJwtAction;
 use TimothyDC\LightspeedRetailApi\Exceptions\AuthenticationException;
 use TimothyDC\LightspeedRetailApi\Exceptions\DuplicateResourceException;
 use TimothyDC\LightspeedRetailApi\Exceptions\LightspeedRetailException;
@@ -228,8 +229,11 @@ class ApiClient
             throw new AuthenticationException(implode(': ', $response), $responseObject->status());
         }
 
+        // convert access token to JWT data
+        $tokenData = resolve(ParseJwtAction::class)->execute($response['access_token']);
+
         $this->tokenRepository->saveToken([
-            'scope' => $response['scope'],
+            'scope' => $tokenData['scope'] ?? null,
             'expires_in' => $response['expires_in'],
             'access_token' => $response['access_token'],
             'refresh_token' => $response['refresh_token'],
@@ -466,8 +470,12 @@ class ApiClient
         $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken(), $this->tokenRepository->getScope());
         $response = $responseObject->json();
 
+        // convert access token to JWT data
+        $tokenData = resolve(ParseJwtAction::class)->execute($response['access_token']);
+
         if ($response) {
             $this->tokenRepository->saveToken([
+                'scope' => $tokenData['scope'] ?? null,
                 'refresh_token' => $response['refresh_token'] ?? null,
                 'access_token' => $response['access_token'] ?? null,
                 'expires_in' => $response['expires_in'] ?? null,
