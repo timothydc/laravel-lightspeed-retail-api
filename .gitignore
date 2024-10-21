@@ -12,6 +12,7 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 .php_cs.cache
+.php-cs-fixer.cache
 .phpstorm.meta.php
 _ide_helper.php
 _ide_helper_models.php
