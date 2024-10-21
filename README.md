@@ -294,7 +294,7 @@ MIT. Please see the [license file](license.md) for more information.
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
 [ls-added-resources]: https://github.com/timothydc/laravel-lightspeed-retail-api/tree/master/src/Services/Lightspeed
-[laravel-docs-collections]: https://laravel.com/docs/7.x/collections
+[laravel-docs-collections]: https://laravel.com/docs/collections
 [ico-version]: https://img.shields.io/packagist/v/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-travis]: https://img.shields.io/travis/timothydc/laravel-lightspeed-retail-api/master.svg?style=flat-square
