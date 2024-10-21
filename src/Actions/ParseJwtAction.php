@@ -10,7 +10,7 @@ class ParseJwtAction
 {
     /**
      * This method decodes a JWT string into:
-     * 
+     *
      * typ    Token Type: The type of token. This will always be JWT.
      * alg    Algorithm: The algorithm used to sign the token. At the moment, this will always be RS256, however, this could change in future.
      * kid    Key ID: The ID of the public key used to verify the token. Can be used to retrieve the public key from the JWKS endpoint in order to verify the signature of the token
