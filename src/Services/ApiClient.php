@@ -518,9 +518,10 @@ class ApiClient
         return collect(explode(' ', $scope))
             ->mapWithKeys(function ($value) {
                 $keyValue = explode(':', $value);
+
                 return [$keyValue[0] => $keyValue[1]];
             })
-            ->filter(fn($value, $key) => $key !== 'systemuserid')
+            ->filter(fn ($value, $key) => $key !== 'systemuserid')
             ->implode(' ');
     }
 }
