@@ -94,4 +94,9 @@ class TokenRepository implements TokenInterface
     {
         return (int)$this->getToken()->getAttribute($this->keyExternalId);
     }
+
+    public function getScope(): string
+    {
+        return $this->getToken()->getAttribute($this->keyScope);
+    }
 }
