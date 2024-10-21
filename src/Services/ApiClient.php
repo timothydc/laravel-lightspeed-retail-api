@@ -69,32 +69,26 @@ class ApiClient
 
     public function getAll(string $resource = null, int $id = null, array $query = []): Collection
     {
-        if (! array_key_exists('offset', $query)) {
-            $query['offset'] = 0;
-        }
-
-        if (! array_key_exists('limit', $query)) {
-            $query['limit'] = self::API_RESULT_LIMIT;
-        }
-
-        $results = [];
-
-        while (($result = $this->get($resource, $id, $query))->count() > 0) {
+        $results = collect();
+        while (($result = $this->getWithPagination($resource, $id, $query))->count() > 0) {
             $result = Collection::unwrap($result);
 
-            if ($query['limit'] === 1) {
-                $result = [$result];
+            // merge resource results
+            $results = $results->merge($result[$resource]);
+
+            // prepare next page
+            if (isset($result['@attributes']['after']) && $result['@attributes']['after'] !== '') {
+                $query['after'] = $result['@attributes']['after'];
+            } else {
+                // exit while loop when there is no "next" page
+                break;
             }
-
-            $results = array_merge($result, $results);
-
-            $query['offset'] += $query['limit'];
         }
 
-        return collect($results);
+        return $results;
     }
 
-    public function get(string $resource = null, int $id = null, array $query = []): Collection
+    public function get(string $resource = null, int $id = null, array $query = [], bool $withPagination = false): Collection
     {
         $responseObject = Http::withHeaders(['Accept' => 'application/json'])
             ->withOptions(['handler' => $this->createHandlerStack()])
@@ -109,9 +103,16 @@ class ApiClient
             return collect($response['Account']);
         }
 
-        // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
+        // fix Lightspeed unstructured way of returning an array when a multidimensional array is expected
         if (isset($response['@attributes']['count']) && $response['@attributes']['count'] === 1) {
             $response[$resource] = [$response[$resource]];
+        }
+        
+        // for pagination, add @attributes meta data to result
+        if ($withPagination) {
+            $response['@attributes'] = $this->extractAttributes($response);
+            $response[$resource] = collect($response[$resource] ?? []);
+            return collect($response);
         }
 
         return collect($response[$resource] ?? []);
@@ -119,46 +120,7 @@ class ApiClient
 
     public function getWithPagination(string $resource = null, int $id = null, array $query = []): Collection
     {
-        $responseObject = Http::withHeaders(['Accept' => 'application/json'])
-            ->withOptions(['handler' => $this->createHandlerStack()])
-            ->get($this->getUrl($resource, $id) . $this->buildQueryString($query));
-
-        $this->logAction('GET ' . $this->getUrl($resource, $id), ['params' => func_get_args(), 'status' => $responseObject->status()]);
-
-        $response = $responseObject->json();
-
-        // unstructured way of requesting the "Account" resource
-        if (! $resource) {
-            return collect($response['Account']);
-        }
-
-        // fix Lightspeed unstructured way of returning an array when a multi dimensional array is expected
-        if (isset($response['@attributes']['count']) && $response['@attributes']['count'] === 1) {
-            $response[$resource] = [$response[$resource]];
-        }
-
-        $attributes = $response['@attributes'];
-        $after = '';
-        $before = '';
-
-        if ($attributes['next'] !== '') {
-            $matches = [];
-            preg_match('/after=([^&]+)/', $attributes['next'], $matches);
-            $after = array_key_exists(1, $matches) ? $matches[1] : '';
-        }
-
-        if ($attributes['previous'] !== '') {
-            $matches = [];
-            preg_match('/before=([^&]+)/', $attributes['previous'], $matches);
-            $before = array_key_exists(1, $matches) ? $matches[1] : '';
-        }
-
-        $attributes['after'] = $after;
-        $attributes['before'] = $before;
-        $response['@attributes'] = collect($attributes);
-        $response[$resource] = collect($response[$resource] ?? []);
-
-        return collect($response);
+        return $this->get($resource, $id, $query, true);
     }
 
     /**
@@ -504,5 +466,34 @@ class ApiClient
         } else {
             Log::emergency(self::class . ' Unable to refresh token.', [$response]);
         }
+    }
+
+    protected function extractAttributes(array $data): Collection
+    {
+        if (!array_key_exists('@attributes', $data)) {
+            return collect();
+        }
+
+        $attributes = $data['@attributes'] ?? [];
+
+        // extract "next" key from URL
+        if (array_key_exists('next', $attributes) && $attributes['next'] !== '') {
+            // parse URL and extract query parameters
+            parse_str(parse_url($attributes['next'])['query'], $queryParameters);
+            $after = $queryParameters['after'] ?? '';
+        }
+
+        // extract "previous" key from URL
+        if (array_key_exists('previous', $attributes) && $attributes['previous'] !== '') {
+            // parse URL and extract query parameters
+            parse_str(parse_url($attributes['previous'])['query'], $queryParameters);
+            $before = $queryParameters['before'] ?? '';
+        }
+
+        // add new keys to $attributes
+        $attributes['after'] = $after ?? '';
+        $attributes['before'] = $before ?? '';
+
+        return collect($attributes);
     }
 }

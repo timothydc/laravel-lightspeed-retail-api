@@ -36,9 +36,9 @@ trait QueryBuilder
 
     private function buildQueryString(array $parameters = []) : string
     {
-        $parameters = $this->buildQueryParameters($parameters);
+        $queryParameters = $this->buildQueryParameters($parameters);
 
-        return $parameters ? '?' . $parameters : '';
+        return $queryParameters ? '?' . $queryParameters : '';
     }
 
     private function buildQueryParameters(array $parameters = []): string
@@ -84,7 +84,7 @@ trait QueryBuilder
         if (array_key_exists($operator, $this->operatorMapping())) {
             $parsedOperator = $this->operatorMapping()[$operator];
 
-            if ($operator != $this->operator_equal) {
+            if ($operator !== $this->operator_equal) {
                 $parsedOperator = '=' . $parsedOperator . ',';
             }
 
