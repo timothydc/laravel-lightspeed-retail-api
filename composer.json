@@ -16,7 +16,8 @@
         "ext-json": "*"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0"
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "orchestra/testbench": "*"
     },
     "autoload": {
         "psr-4": {
