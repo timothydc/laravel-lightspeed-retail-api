@@ -3,6 +3,16 @@
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Total Downloads][ico-downloads]][link-downloads]
 
+## Version Guidance
+
+| Version | PHP Version  | Lightspeed Version | Support                      |
+|---------|--------------|--------------------|------------------------------|
+| alpha   | ^7.4 \| ^8.0 | 2 \| 3             | Unsupported since 2023-11-14 |
+| 1.0     | ^7.4 \| ^8.0 | 2 \| 3             | Unsupported since 2024-10-21 |
+| 2.0     | ^8.0         | 2 \| 3             | New features                 |
+
+This package *should* be up to date with the [Lightspeed API changes from 2024-07-31][ls-changelog].
+
 ## Installation
 
 Via Composer
@@ -294,6 +304,7 @@ MIT. Please see the [license file](license.md) for more information.
 [ls-client-portal-register]: https://cloud.lightspeedapp.com/oauth/register.php
 [ls-client-portal]: https://cloud.lightspeedapp.com/oauth/update.php
 [ls-added-resources]: https://github.com/timothydc/laravel-lightspeed-retail-api/tree/master/src/Services/Lightspeed
+[ls-changelog]: https://developers.lightspeedhq.com/retail/introduction/changelog/
 [laravel-docs-collections]: https://laravel.com/docs/collections
 [ico-version]: https://img.shields.io/packagist/v/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timothydc/laravel-lightspeed-retail-api.svg?style=flat-square
