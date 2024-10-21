@@ -112,6 +112,7 @@ class ApiClient
         if ($withPagination) {
             $response['@attributes'] = $this->extractAttributes($response);
             $response[$resource] = collect($response[$resource] ?? []);
+
             return collect($response);
         }
 
@@ -470,7 +471,7 @@ class ApiClient
 
     protected function extractAttributes(array $data): Collection
     {
-        if (!array_key_exists('@attributes', $data)) {
+        if (! array_key_exists('@attributes', $data)) {
             return collect();
         }
 
