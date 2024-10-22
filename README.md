@@ -19,10 +19,9 @@ For general information on how to use the Lightspeed Retail API, refer to the of
 ### Register API client
 
 Before creating an API connection, you will need to sign up for an API client with Lightspeed Retail.
-You can do this via [the client portal][ls-client-portal-register]. The process can take up to 48 hours.
-_Bummer, I know._
+You can do this via [the client portal][ls-client-portal-register].
 
-The API client is developer friendly, you can set `http://localhost:8080` as your redirect URI.
+The API client is developer friendly, you can set `https://your-domain.test` as your redirect URI.
 Remember the value of your redirect URI, we will need it later on.
 
 
