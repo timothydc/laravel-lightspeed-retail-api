@@ -6,9 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.0.0] - 2024-10-22
+### Changed
+- Upgrade OAuth flow and parse JWT data
+- Update list of available scopes
+
 ## [v1.1.0] - 2024-10-21
 ### Changed
--  Upgrade pagination to v3 for `getAll()`
+- Upgrade pagination to v3 for `getAll()`
 
 ## [v1.0.0] - 2024-10-20
 ### Fixed
@@ -30,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Everything. Initial alpha release
 
-[Unreleased]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v2.0.0...HEAD
+[v2.0.0]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v1.1.0...v2.0.0
 [v1.1.0]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v1.0.0...v1.1.0
 [v1.0.0]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v0.21-alpha...v1.0.0
 [v0.21-alpha]: https://github.com/timothydc/laravel-lightspeed-retail-api/compare/v0.20-alpha...v0.21-alpha

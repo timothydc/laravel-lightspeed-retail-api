@@ -18,4 +18,6 @@ interface TokenInterface
     public function getAccessToken(): string;
 
     public function getRefreshToken(): string;
+
+    public function getScope(): string;
 }
