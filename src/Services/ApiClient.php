@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\CurlHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -258,10 +259,6 @@ class ApiClient
             'grant_type' => $grantType,
         ];
 
-        if ($scope) {
-            $postFields += ['scope' => $this->filterInvalidScopes($scope)];
-        }
-
         switch ($grantType) {
             case self::GRANT_TYPE_AUTHORIZATION_CODE:
                 $postFields += ['code' => $code];
@@ -273,7 +270,8 @@ class ApiClient
                 break;
         }
 
-        return Http::post('https://cloud.lightspeedapp.com/auth/oauth/token', $postFields);
+        // the token endpoint expects a form-encoded body (RFC 6749) and rejects a "scope" parameter, so $scope is not sent
+        return Http::asForm()->post('https://cloud.lightspeedapp.com/auth/oauth/token', $postFields);
     }
 
     protected function createHandlerStack(): HandlerStack
@@ -465,23 +463,59 @@ class ApiClient
         };
     }
 
+    /**
+     * Refresh tokens are single-use: the lock and the re-read from the database
+     * make sure concurrent processes never spend the same refresh token twice,
+     * which would invalidate the token chain until a manual re-authorisation.
+     *
+     * @throws AuthenticationException
+     */
     protected function refreshToken(): void
     {
-        $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken(), $this->tokenRepository->getScope());
-        $response = $responseObject->json();
+        $lock = Cache::store($this->cacheStore)->lock('lightspeed_retail_token_refresh', 30);
 
-        // convert access token to JWT data
-        $tokenData = resolve(ParseJwtAction::class)->execute($response['access_token']);
+        try {
+            $lock->block(15);
+        } catch (LockTimeoutException $exception) {
+            // another process is refreshing right now - pick up its result
+            $this->tokenRepository->getToken()->refresh();
 
-        if ($response) {
+            return;
+        }
+
+        try {
+            $staleAccessToken = $this->tokenRepository->getAccessToken();
+            $this->tokenRepository->getToken()->refresh();
+
+            if ($this->tokenRepository->getAccessToken() !== $staleAccessToken) {
+                // another process already stored a fresh token while we waited for the lock
+                return;
+            }
+
+            $responseObject = $this->requestRefreshToken($this->tokenRepository->getRefreshToken(), $this->tokenRepository->getScope());
+            $response = $responseObject->json();
+
+            if ($responseObject->clientError() || $responseObject->serverError() || ! isset($response['access_token'])) {
+                Log::error(self::class . ' Unable to refresh token.', ['status' => $responseObject->status(), 'body' => $response]);
+
+                throw new AuthenticationException(
+                    'Unable to refresh the Lightspeed Retail access token: '
+                    . ($response['error_description'] ?? $response['error'] ?? 'HTTP ' . $responseObject->status()),
+                    $responseObject->status()
+                );
+            }
+
+            // convert access token to JWT data
+            $tokenData = resolve(ParseJwtAction::class)->execute($response['access_token']);
+
             $this->tokenRepository->saveToken([
                 'scope' => $tokenData['scope'] ?? null,
+                'access_token' => $response['access_token'],
                 'refresh_token' => $response['refresh_token'] ?? null,
-                'access_token' => $response['access_token'] ?? null,
                 'expires_in' => $response['expires_in'] ?? null,
             ]);
-        } else {
-            Log::emergency(self::class . ' Unable to refresh token.', [$response]);
+        } finally {
+            $lock->release();
         }
     }
 
@@ -522,7 +556,7 @@ class ApiClient
         if (! str_contains($scope, 'systemuserid')) {
             return $scope;
         }
-        
+
         return collect(explode(' ', $scope))
             ->mapWithKeys(function ($value) {
                 $keyValue = explode(':', $value);
