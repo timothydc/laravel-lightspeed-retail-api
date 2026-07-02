@@ -37,6 +37,6 @@ class LightspeedRetailResource extends Model
 
     public function getRetailLink(): string
     {
-        return strtolower(sprintf('https://us.merchantos.com/?name=%s.views.%s&form_name=view&id=%d', $this->lightspeed_type, $this->lightspeed_type, $this->lightspeed_id));
+        return strtolower(sprintf('https://us.lightspeedapp.com/?name=%s.views.%s&form_name=view&id=%d', $this->lightspeed_type, $this->lightspeed_type, $this->lightspeed_id));
     }
 }

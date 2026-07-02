@@ -33,6 +33,6 @@ class LightspeedRetailApi
             'state' => $state,
         ]);
 
-        return 'https://cloud.merchantos.com/auth/oauth/authorize' . '?' . $query;
+        return 'https://cloud.lightspeedapp.com/auth/oauth/authorize' . '?' . $query;
     }
 }
