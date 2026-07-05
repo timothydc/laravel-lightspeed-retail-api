@@ -23,25 +23,26 @@ class TokenRepository implements TokenInterface
         $this->table = $table;
     }
 
+    // null values are ignored so an incomplete token response can never wipe stored credentials
     public function saveToken(array $data): ApiToken
     {
-        if (array_key_exists('access_token', $data)) {
+        if (isset($data['access_token'])) {
             $this->getToken()->setAttribute($this->keyAccessToken, $data['access_token']);
         }
 
-        if (array_key_exists('refresh_token', $data)) {
+        if (isset($data['refresh_token'])) {
             $this->getToken()->setAttribute($this->keyRefreshToken, $data['refresh_token']);
         }
 
-        if (array_key_exists('expires_in', $data)) {
+        if (isset($data['expires_in'])) {
             $this->getToken()->setAttribute($this->keyExpiresAt, now()->addSeconds($data['expires_in'] - 2)); // some leeway?
         }
 
-        if (array_key_exists('scope', $data)) {
+        if (isset($data['scope'])) {
             $this->getToken()->setAttribute($this->keyScope, $data['scope']);
         }
 
-        if (array_key_exists('account_id', $data)) {
+        if (isset($data['account_id'])) {
             $this->getToken()->setAttribute($this->keyExternalId, $data['account_id']);
         }
 
